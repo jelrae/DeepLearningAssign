@@ -17,10 +17,10 @@ class LinearModule(object):
       out_features: size of each output sample
 
     TODO:
-    Initialize weights self.params['weight'] using normal distribution with mean = 0 and 
+    Done - Initialize weights self.params['weight'] using normal distribution with mean = 0 and
     std = 0.0001. Initialize biases self.params['bias'] with 0. 
     
-    Also, initialize gradients with zeros.
+    Done - Also, initialize gradients with zeros.
     """
     
     ########################
@@ -28,7 +28,13 @@ class LinearModule(object):
     #######################
     self.params = {'weight': None, 'bias': None}
     self.grads = {'weight': None, 'bias': None}
-    raise NotImplementedError
+#    raise NotImplementedError
+    self.params['weight'] = np.random.normal(loc=0.0, scale=0.0001, size=(out_features, in_features))
+    self.params['bias'] = np.zeros((out_features,1))
+    self.grads['weight'] = np.zeros(shape=(out_features, in_features))
+    self.grads['bias'] = np.zeros((out_features, 1))
+
+
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -51,7 +57,11 @@ class LinearModule(object):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-    raise NotImplementedError
+    #raise NotImplementedError
+
+    self.act = x
+    out = self.params['weight'].dot(x) + self.params['bias']  # shape (out x 1)
+
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -75,7 +85,11 @@ class LinearModule(object):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-    raise NotImplementedError
+    #raise NotImplementedError
+    dw = np.array([np.eye(self.grads['weight'].shape[0], 1, -i).dot(self.act.T) for i in range(0, self.grads['weight'].shape[0])])
+    self.grads['weight'] = dout.dot(dw)
+    self.grads['bias'] = dout.dot(np.eye(dout.shape[1]))
+    dx = dout.dot(self.params['weight'])
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -100,7 +114,11 @@ class LeakyReLUModule(object):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-    raise NotImplementedError
+    #raise NotImplementedError
+    self.n_slope = neg_slope
+    # self.input = None
+    # self.output = None
+    self.act = None
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -123,7 +141,9 @@ class LeakyReLUModule(object):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-    raise NotImplementedError
+    #raise NotImplementedError
+    self.act = x
+    out = np.maximum(0,x) + (np.minimum(0,x)*self.n_slope)
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -146,7 +166,8 @@ class LeakyReLUModule(object):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-    raise NotImplementedError
+    # raise NotImplementedError
+    dx = dout.dot(np.diag((self.act>0).astype(int) + (self.n_slope*(self.act>0).astype(int))))
     ########################
     # END OF YOUR CODE    #
     #######################    
@@ -177,7 +198,10 @@ class SoftMaxModule(object):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-    raise NotImplementedError
+    # raise NotImplementedError
+    self.act = x
+    mx = x.max()
+    out = np.exp(x - mx)/sum(np.exp(x - mx))
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -199,7 +223,9 @@ class SoftMaxModule(object):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-    raise NotImplementedError
+    # raise NotImplementedError
+    mx = x.max()
+    dx = dout.dot(np.diag(np.exp(x - mx)/sum(np.exp(x - mx))) - (np.exp(x - mx)/sum(np.exp(x - mx))).dot(np.exp(x.T - mx)/sum(np.exp(x - mx))))
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -227,7 +253,8 @@ class CrossEntropyModule(object):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-    raise NotImplementedError
+    # raise NotImplementedError
+    out = - y.T.dot(np.log(x))
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -250,7 +277,8 @@ class CrossEntropyModule(object):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-    raise NotImplementedError
+    # raise NotImplementedError
+    dx = np.diag(np.divide(-y,x)) #/y.shape[0]
     ########################
     # END OF YOUR CODE    #
     #######################

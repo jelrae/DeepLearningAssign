@@ -37,7 +37,15 @@ class MLP(object):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-    raise NotImplementedError
+    #raise NotImplementedError
+    self.modules = []
+    cur_input = n_inputs
+    if len(n_hidden) > 0:
+      for l in range(0, len(n_hidden)):
+        self.modules.append(LinearModule(cur_input, n_hidden[n]))
+
+
+
     ########################
     # END OF YOUR CODE    #
     #######################
