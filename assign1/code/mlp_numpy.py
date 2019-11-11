@@ -41,10 +41,16 @@ class MLP(object):
     self.modules = []
     cur_input = n_inputs
     if len(n_hidden) > 0:
-      for l in range(0, len(n_hidden)):
-        self.modules.append(LinearModule(cur_input, n_hidden[n]))
-
-
+      for out_lay in n_hidden:
+        self.modules.append(LinearModule(cur_input, out_lay))
+        print("Added Linear Module")
+        self.modules.append(LeakyReLUModule(neg_slope))
+        print("Added LReLU Module")
+        cur_input = out_lay
+    self.modules.append(LinearModule(cur_input, n_classes))
+    print("Added last LinearModel")
+    self.modules.append(SoftMaxModule())
+    print("Added SoftMax Module")
 
     ########################
     # END OF YOUR CODE    #
@@ -67,7 +73,10 @@ class MLP(object):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-    raise NotImplementedError
+    # raise NotImplementedError
+    out = x
+    for m in self.modules:
+      out = m.forward(out)
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -84,11 +93,15 @@ class MLP(object):
     TODO:
     Implement backward pass of the network.
     """
-    
+
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-    raise NotImplementedError
+    #raise NotImplementedError
+    error_init = dout
+    error = dout
+    for m in reversed(self.modules):
+      error = m.backward(error)
     ########################
     # END OF YOUR CODE    #
     #######################

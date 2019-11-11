@@ -45,9 +45,10 @@ def accuracy(predictions, targets):
   """
 
   ########################
-  # PUT YOUR CODE HERE  #
+  # PUT YOUR CODE HERE
   #######################
-  raise NotImplementedError
+  # raise NotImplementedError
+  accuracy = np.sum(np.argmax(np.argmax(targets, axis = 1) == np.argmax(predictions, axis = 1)))/targets.shape[0]
   ########################
   # END OF YOUR CODE    #
   #######################
@@ -80,7 +81,50 @@ def train():
   ########################
   # PUT YOUR CODE HERE  #
   #######################
-  raise NotImplementedError
+  #raise NotImplementedError
+
+  #Load in data set
+  cifar10_set = cifar10_utils.get_cifar10(FLAGS.data_dir)
+  # Get Batches
+  batches = []
+
+  #Init tracking arrays
+  acc = []
+  loss = []
+
+  for i in range(0,10):#(0, FLAGS.max_steps):
+    x,y = cifar10_set['train'].next_batch(FLAGS.batch_size)
+    #print(x.shape)
+    x = x.reshape(FLAGS.batch_size, -1)
+    x  = x.T
+    # print(x.shape)
+    # print(y.shape)
+    y = y.T
+    batches.append([x,y])
+  print(batches[0][0].shape)
+  print(batches[0][1].shape)
+  out_dim = batches[0][1].shape[0]
+  in_dim = batches[0][0].shape[0]
+
+  mlp = MLP(in_dim, dnn_hidden_units, out_dim, FLAGS.neg_slope)
+  loss_funct = CrossEntropyModule()
+
+  for i in range(0,10):#(0, FLAGS.max_steps):
+    x,t = batches[i]
+    y = mlp.forward(x)
+    loss.append(loss_funct.forward(y,t))
+    mlp.backward(loss_funct.backward(y,t))
+    for mod in mlp.modules:
+      if isinstance(m, LinearModule):
+        m.params['weight'] -= FLAGS.learning_rate * m.grads['weight']
+        m.params['bias'] -= FLAGS.learning_rate * m.grads['bias']
+    if i % FLAGS.eval_freq == 0:
+      x,t = cifar10_set['test'].images, cifar10_set['test'].labels
+      x = x.reshape(FLAGS.batch_size, -1)
+      x = x.T
+      y = mlp.forward(x)
+      acc.append(accuracy(y,t)*100)
+      print("The accuracy at step, " + str(i) + " is : " + str(acc[-1]))
   ########################
   # END OF YOUR CODE    #
   #######################

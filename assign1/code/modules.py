@@ -86,6 +86,9 @@ class LinearModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     #raise NotImplementedError
+    print('Weights update time')
+    print(dout.shape)
+    print(self.grads['weight'].shape)
     dw = np.array([np.eye(self.grads['weight'].shape[0], 1, -i).dot(self.act.T) for i in range(0, self.grads['weight'].shape[0])])
     self.grads['weight'] = dout.dot(dw)
     self.grads['bias'] = dout.dot(np.eye(dout.shape[1]))
@@ -167,7 +170,7 @@ class LeakyReLUModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
-    dx = dout.dot(np.diag((self.act>0).astype(int) + (self.n_slope*(self.act>0).astype(int))))
+    dx = dout * (self.act > 0 + self.n_slope * (self.act <= 0))
     ########################
     # END OF YOUR CODE    #
     #######################    
@@ -199,9 +202,13 @@ class SoftMaxModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
-    self.act = x
-    mx = x.max()
-    out = np.exp(x - mx)/sum(np.exp(x - mx))
+
+    mx = x.max(axis = 1, keepdims = True)
+    # print(mx)
+    y = np.exp(x - mx)
+    out = y / y.sum(axis = 1, keepdims = True)
+    self.act = out
+    # print(out.shape)
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -224,8 +231,21 @@ class SoftMaxModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
-    mx = x.max()
-    dx = dout.dot(np.diag(np.exp(x - mx)/sum(np.exp(x - mx))) - (np.exp(x - mx)/sum(np.exp(x - mx))).dot(np.exp(x.T - mx)/sum(np.exp(x - mx))))
+    # mx = self.act.max(axis = 1, keepdims = True)
+    # y = np.exp(self.act - mx)
+    # x1 = y/y.sum(axis = 1, keepdims = True)
+    # print("this is dout")
+    # print(dout.shape)
+    dx_dot = self.act[:,:,None] * self.act[:,None]
+    dx_diag = np.apply_along_axis(np.diag, axis=1, arr=self.act)
+    dxdx = dx_diag - dx_dot
+    dx = np.einsum('ik,ijk -> ik', dout, dxdx)
+    # batch_outer = np.einsum('bi,bo->bio', self.act, self.act)
+    # dout_outer = np.matmul(np.expand_dims(dout, axis=1), batch_outer)
+    # dx = dout * self.act - dout_outer.squeeze()
+    # print(dx.shape)
+
+    # breakpoint()
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -254,7 +274,12 @@ class CrossEntropyModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
-    out = - y.T.dot(np.log(x))
+    out =  -np.sum(y*np.log(x))
+    # print("testing the out things")
+    # print(out.shape)
+    # print(out)
+    # out = - sum(y.T.dot(np.log(x)))/y.shape[1]
+    self.loss = out
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -278,7 +303,18 @@ class CrossEntropyModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
-    dx = np.diag(np.divide(-y,x)) #/y.shape[0]
+    # print(y.shape)
+    # print(x.shape)
+    # test = np.divide(-y,x)
+    # print(test.shape)
+    # print("the loss shape is:")
+    # print(self.loss.shape)
+    dx = (-y + x).T * 1/y.shape[1]
+    # this is old and possibly stupid
+    # dx = self.loss*np.diag(np.divide(-y,x))
+    # dx = np.diag(np.divide(-y, x)) / y.shape[1]
+    print("Loss is back propping")
+    print(dx.shape)
     ########################
     # END OF YOUR CODE    #
     #######################
