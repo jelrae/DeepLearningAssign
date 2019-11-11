@@ -96,10 +96,10 @@ def train():
     x,y = cifar10_set['train'].next_batch(FLAGS.batch_size)
     #print(x.shape)
     x = x.reshape(FLAGS.batch_size, -1)
-    x  = x.T
+    # x  = x.T
     # print(x.shape)
     # print(y.shape)
-    y = y.T
+    # y = y.T
     batches.append([x,y])
   print(batches[0][0].shape)
   print(batches[0][1].shape)
@@ -121,7 +121,7 @@ def train():
     if i % FLAGS.eval_freq == 0:
       x,t = cifar10_set['test'].images, cifar10_set['test'].labels
       x = x.reshape(FLAGS.batch_size, -1)
-      x = x.T
+      # x = x.T
       y = mlp.forward(x)
       acc.append(accuracy(y,t)*100)
       print("The accuracy at step, " + str(i) + " is : " + str(acc[-1]))

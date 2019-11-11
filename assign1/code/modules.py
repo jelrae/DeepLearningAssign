@@ -231,18 +231,12 @@ class SoftMaxModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
-    # mx = self.act.max(axis = 1, keepdims = True)
-    # y = np.exp(self.act - mx)
-    # x1 = y/y.sum(axis = 1, keepdims = True)
     # print("this is dout")
     # print(dout.shape)
     dx_dot = self.act[:,:,None] * self.act[:,None]
     dx_diag = np.apply_along_axis(np.diag, axis=1, arr=self.act)
     dxdx = dx_diag - dx_dot
-    dx = np.einsum('ik,ijk -> ik', dout, dxdx)
-    # batch_outer = np.einsum('bi,bo->bio', self.act, self.act)
-    # dout_outer = np.matmul(np.expand_dims(dout, axis=1), batch_outer)
-    # dx = dout * self.act - dout_outer.squeeze()
+    dx = np.einsum('ij,ijk -> ik', dout, dxdx)
     # print(dx.shape)
 
     # breakpoint()
