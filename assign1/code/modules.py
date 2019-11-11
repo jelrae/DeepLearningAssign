@@ -66,7 +66,7 @@ class LinearModule(object):
     # print(x.shape)
     # print(self.params['weight'].shape)
     # print(self.params['bias'].shape)
-    out = x @ self.params['weight'].T + self.params['bias']  # shape (out x 1)
+    out = x @ self.params['weight'].T + self.params['bias'].T  # shape (out x 1)
 
     ########################
     # END OF YOUR CODE    #
@@ -92,10 +92,14 @@ class LinearModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     #raise NotImplementedError
-    print('Weights update time')
-    print(dout.shape)
+    # print('Weights update time')
+    # print(dout.shape)
+    # print(self.grads['weight'].shape)
+    print('Linear time')
+    print(self.act.shape)
     print(self.grads['weight'].shape)
-    dw = np.array([np.eye(self.grads['weight'].shape[0], 1, -i).dot(self.act.T) for i in range(0, self.grads['weight'].shape[0])])
+    #dw = np.array([np.eye(self.grads['weight'].shape[1], 1, -i) @ self.act.T for i in range(0, self.grads['weight'].shape[1])])
+    dw =
     self.grads['weight'] = dout.dot(dw)
     self.grads['bias'] = dout.dot(np.eye(dout.shape[1]))
     dx = dout.dot(self.params['weight'])
@@ -272,7 +276,7 @@ class CrossEntropyModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
-    out =  -np.sum(y*np.log(x))
+    out = -np.sum(y*np.log(x))/y.shape[0]
     # print("testing the out things")
     # print(out.shape)
     # print(out)
@@ -301,18 +305,21 @@ class CrossEntropyModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
+    # print('Shape y and x')
     # print(y.shape)
     # print(x.shape)
     # test = np.divide(-y,x)
     # print(test.shape)
     # print("the loss shape is:")
     # print(self.loss.shape)
-    dx = (-y + x).T * 1/y.shape[1]
+    dx = (-y / x)/y.shape[0]
+
+    #print(dx.shape)
     # this is old and possibly stupid
     # dx = self.loss*np.diag(np.divide(-y,x))
     # dx = np.diag(np.divide(-y, x)) / y.shape[1]
-    print("Loss is back propping")
-    print(dx.shape)
+    # print("Loss is back propping")
+    # print(dx.shape)
     ########################
     # END OF YOUR CODE    #
     #######################
