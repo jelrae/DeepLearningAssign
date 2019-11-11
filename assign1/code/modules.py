@@ -58,9 +58,15 @@ class LinearModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     #raise NotImplementedError
-
+    # x is an S x l-1
+    # W is an l x l-1
+    # b is an l x 1
     self.act = x
-    out = self.params['weight'].dot(x) + self.params['bias']  # shape (out x 1)
+    # print("Forward Linear")
+    # print(x.shape)
+    # print(self.params['weight'].shape)
+    # print(self.params['bias'].shape)
+    out = x @ self.params['weight'].T + self.params['bias']  # shape (out x 1)
 
     ########################
     # END OF YOUR CODE    #
@@ -231,13 +237,11 @@ class SoftMaxModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
-    # print("this is dout")
-    # print(dout.shape)
+
     dx_dot = self.act[:,:,None] * self.act[:,None]
     dx_diag = np.apply_along_axis(np.diag, axis=1, arr=self.act)
     dxdx = dx_diag - dx_dot
     dx = np.einsum('ij,ijk -> ik', dout, dxdx)
-    # print(dx.shape)
 
     # breakpoint()
     #######################
