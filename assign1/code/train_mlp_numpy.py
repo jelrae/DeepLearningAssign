@@ -11,6 +11,7 @@ import numpy as np
 import os
 from mlp_numpy import MLP
 from modules import CrossEntropyModule
+from modules import LinearModule #TODO IS THIS OK??????
 import cifar10_utils
 
 # Default constants
@@ -96,32 +97,27 @@ def train():
     x,y = cifar10_set['train'].next_batch(FLAGS.batch_size)
     #print(x.shape)
     x = x.reshape(FLAGS.batch_size, -1)
-    # x  = x.T
-    # print(x.shape)
-    # print(y.shape)
-    # y = y.T
     batches.append([x,y])
   print(batches[0][0].shape)
   print(batches[0][1].shape)
-  out_dim = batches[0][1].shape[0]
-  in_dim = batches[0][0].shape[0]
+  out_dim = batches[0][1].shape[1]
+  in_dim = batches[0][0].shape[1]
 
   mlp = MLP(in_dim, dnn_hidden_units, out_dim, FLAGS.neg_slope)
   loss_funct = CrossEntropyModule()
 
-  for i in range(0,10):#(0, FLAGS.max_steps):
+  for i in (0, FLAGS.max_steps):
     x,t = batches[i]
     y = mlp.forward(x)
     loss.append(loss_funct.forward(y,t))
     mlp.backward(loss_funct.backward(y,t))
     for mod in mlp.modules:
-      if isinstance(m, LinearModule):
+      if type(mlp.modules[0]) == LinearModule: #isinstance(mod, LinearModule):
         m.params['weight'] -= FLAGS.learning_rate * m.grads['weight']
         m.params['bias'] -= FLAGS.learning_rate * m.grads['bias']
     if i % FLAGS.eval_freq == 0:
       x,t = cifar10_set['test'].images, cifar10_set['test'].labels
       x = x.reshape(FLAGS.batch_size, -1)
-      # x = x.T
       y = mlp.forward(x)
       acc.append(accuracy(y,t)*100)
       print("The accuracy at step, " + str(i) + " is : " + str(acc[-1]))

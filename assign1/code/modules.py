@@ -62,6 +62,9 @@ class LinearModule(object):
     # W is an l x l-1
     # b is an l x 1
     self.act = x
+    print(x.shape)
+    print(self.params['weight'].shape)
+    print(self.params['bias'].shape)
     out = x @ self.params['weight'].T + self.params['bias'].T  # shape (out x 1)
 
     ########################
@@ -88,13 +91,6 @@ class LinearModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     #raise NotImplementedError
-    # print('Weights update time')
-    # print(dout.shape)
-    # print(self.grads['weight'].shape)
-    # print('Linear time')
-    # print(self.act.shape)
-    # print(self.grads['weight'].shape)
-    #dw = np.array([np.eye(self.grads['weight'].shape[1], 1, -i) @ self.act.T for i in range(0, self.grads['weight'].shape[1])])
     self.grads['weight'] = dout.T @ self.act
     self.grads['bias'] = np.sum(dout, axis=0)
     # breakpoint()
@@ -274,10 +270,6 @@ class CrossEntropyModule(object):
     #######################
     # raise NotImplementedError
     out = -np.sum(y*np.log(x))/y.shape[0]
-    # print("testing the out things")
-    # print(out.shape)
-    # print(out)
-    # out = - sum(y.T.dot(np.log(x)))/y.shape[1]
     self.loss = out
     ########################
     # END OF YOUR CODE    #
@@ -302,21 +294,8 @@ class CrossEntropyModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
-    # print('Shape y and x')
-    # print(y.shape)
-    # print(x.shape)
-    # test = np.divide(-y,x)
-    # print(test.shape)
-    # print("the loss shape is:")
-    # print(self.loss.shape)
     dx = (-y / x)/y.shape[0]
-
     #print(dx.shape)
-    # this is old and possibly stupid
-    # dx = self.loss*np.diag(np.divide(-y,x))
-    # dx = np.diag(np.divide(-y, x)) / y.shape[1]
-    # print("Loss is back propping")
-    # print(dx.shape)
     ########################
     # END OF YOUR CODE    #
     #######################
