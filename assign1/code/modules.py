@@ -63,9 +63,9 @@ class LinearModule(object):
     # b is an l x 1
     self.act = x
     # print('This is for the forward')
-    print(x.shape)
-    print(self.params['weight'].shape)
-    print(self.params['bias'].shape)
+    # print(x.shape)
+    # print(self.params['weight'].shape)
+    # print(self.params['bias'].shape)
     out = x @ self.params['weight'].T + self.params['bias'].T  # shape (out x 1)
 
     ########################

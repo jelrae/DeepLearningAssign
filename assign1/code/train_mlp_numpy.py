@@ -111,8 +111,6 @@ def train():
     mlp.backward(loss_funct.backward(y,t))
     for mod in mlp.modules:
       if type(mod) == LinearModule: #isinstance(mod, LinearModule):
-        # print(mod.params['bias'].shape)
-        # print(mod.grads['bias'].shape)
         mod.params['weight'] -= FLAGS.learning_rate * mod.grads['weight']
         mod.params['bias'] -= FLAGS.learning_rate * mod.grads['bias']
     if i % FLAGS.eval_freq == 0:
