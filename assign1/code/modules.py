@@ -62,10 +62,6 @@ class LinearModule(object):
     # W is an l x l-1
     # b is an l x 1
     self.act = x
-    # print("Forward Linear")
-    # print(x.shape)
-    # print(self.params['weight'].shape)
-    # print(self.params['bias'].shape)
     out = x @ self.params['weight'].T + self.params['bias'].T  # shape (out x 1)
 
     ########################
@@ -95,14 +91,15 @@ class LinearModule(object):
     # print('Weights update time')
     # print(dout.shape)
     # print(self.grads['weight'].shape)
-    print('Linear time')
-    print(self.act.shape)
-    print(self.grads['weight'].shape)
+    # print('Linear time')
+    # print(self.act.shape)
+    # print(self.grads['weight'].shape)
     #dw = np.array([np.eye(self.grads['weight'].shape[1], 1, -i) @ self.act.T for i in range(0, self.grads['weight'].shape[1])])
-    dw =
-    self.grads['weight'] = dout.dot(dw)
-    self.grads['bias'] = dout.dot(np.eye(dout.shape[1]))
-    dx = dout.dot(self.params['weight'])
+    self.grads['weight'] = dout.T @ self.act
+    self.grads['bias'] = np.sum(dout, axis=0)
+    # breakpoint()
+    dx =  dout @ self.params['weight']
+    # print(dx.shape)
     ########################
     # END OF YOUR CODE    #
     #######################
