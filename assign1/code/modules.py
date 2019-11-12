@@ -62,6 +62,7 @@ class LinearModule(object):
     # W is an l x l-1
     # b is an l x 1
     self.act = x
+    # print('This is for the forward')
     print(x.shape)
     print(self.params['weight'].shape)
     print(self.params['bias'].shape)
@@ -91,8 +92,9 @@ class LinearModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     #raise NotImplementedError
-    self.grads['weight'] = dout.T @ self.act
-    self.grads['bias'] = np.sum(dout, axis=0)
+    # print('This is at the backwards')
+    # self.grads['weight'] = dout.T @ self.act
+    # self.grads['bias'] = np.sum(dout, axis=0)
     # breakpoint()
     dx =  dout @ self.params['weight']
     # print(dx.shape)
