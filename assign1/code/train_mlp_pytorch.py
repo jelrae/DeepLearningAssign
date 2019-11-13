@@ -51,6 +51,7 @@ def accuracy(predictions, targets):
   # PUT YOUR CODE HERE  #
   #######################
   # raise NotImplementedError
+  # breakpoint()
   accuracy = np.sum(np.argmax(predictions, axis=1) == np.argmax(targets, axis=1)) / targets.shape[0]
   ########################
   # END OF YOUR CODE    #
@@ -108,7 +109,7 @@ def train():
     loss = loss_funct(y,torch.LongTensor(np.argmax(t, 1)).to(device))
     loss_train.append(loss)
     acc_train.append(accuracy(y.cpu().detach().numpy(), t))
-    # breakpoint()
+    optimizer.zero_grad()
     loss.backward()
     optimizer.step()
     if i % FLAGS.eval_freq == 0:
@@ -129,7 +130,7 @@ def train():
   plt.ylabel('Accuracy')
   plt.title('Accuracy of Train and Test Set Through Training')
   plt.legend()
-  plt.savefig('Accuracy_basic1.png')
+  plt.savefig('Accuracy_torch1.png')
   # plt.show()
 
   # plt.figure(1, figsize=(17,10))
@@ -138,7 +139,7 @@ def train():
   plt.xlabel('Epoch')
   plt.ylabel('Loss')
   plt.title('Loss Through Training')
-  plt.savefig('Loss_basic1.png')
+  plt.savefig('Loss_torch1.png')
   # plt.show()
   # plt.legend()
   ########################
