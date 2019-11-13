@@ -37,6 +37,7 @@ class MLP(nn.Module):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
+    super(MLP, self).__init__()
     mods = []
     cur_input = n_inputs
     if len(n_hidden) > 0:
@@ -48,8 +49,7 @@ class MLP(nn.Module):
         cur_input = out_lay
     print('Adding output Linear')
     mods.append(nn.Linear(in_features=cur_input, out_features=n_classes))
-
-    self.modules = nn.Sequential(*mods)
+    self.modls = nn.Sequential(*mods)
     # raise NotImplementedError
     ########################
     # END OF YOUR CODE    #
@@ -73,7 +73,7 @@ class MLP(nn.Module):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
-    out = self.modules(x)
+    out = self.modls(x)
     ########################
     # END OF YOUR CODE    #
     #######################

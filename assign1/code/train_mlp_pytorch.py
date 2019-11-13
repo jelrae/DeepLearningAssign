@@ -12,6 +12,9 @@ import os
 from mlp_pytorch import MLP
 import cifar10_utils
 import torch.nn as nn
+import torch
+
+import matplotlib.pyplot as plt
 
 # Default constants
 DNN_HIDDEN_UNITS_DEFAULT = '100'
@@ -90,25 +93,54 @@ def train():
   loss_funct = nn.CrossEntropyLoss()
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
   cifar10_set = cifar10_utils.get_cifar10(FLAGS.data_dir)
-  #TODO make an optimizer
 
   x, y = cifar10_set['train'].next_batch(FLAGS.batch_size)
   x = x.reshape(FLAGS.batch_size, -1)
+  # print(y.shape)
   out_dim = y.shape[1]
   in_dim = x.shape[1]
-  mlp = MLP(in_dim, dnn_hidden_units, out_dim, FLAGS.neg_slope).to(device)
+  mlp = MLP(in_dim, dnn_hidden_units, out_dim, neg_slope).to(device)
+  optimizer = torch.optim.SGD(mlp.parameters(), lr = FLAGS.learning_rate)
   for i in range(0, FLAGS.max_steps + 1):
     x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
     x = torch.tensor(x.reshape(FLAGS.batch_size, -1), dtype=torch.float32).to(device)
-    t = torch.tensor(y, dtype=torch.long).to(device)
     y = mlp.forward(x)
-    loss = loss_funct(y,t)
+    loss = loss_funct(y,torch.LongTensor(np.argmax(t, 1)).to(device))
     loss_train.append(loss)
-    # Todo loss lackwards?
+    acc_train.append(accuracy(y.cpu().detach().numpy(), t))
+    # breakpoint()
     loss.backward()
-    #ToDo optimizer much?
+    optimizer.step()
+    if i % FLAGS.eval_freq == 0:
+      x,t = cifar10_set['test'].images, cifar10_set['test'].labels
+      x = torch.tensor(x.reshape(x.shape[0], -1), dtype=torch.float32).to(device)
+      y = mlp.forward(x)
+      # print(t.shape)
+      # print(y.shape)
+      acc_test.append(accuracy(y.cpu().detach().numpy(),t))
+      print("The accuracy at step, " + str(i) + " is : " + str(acc_test[-1]))
 
+  #Plotting the accuracy of test and train:
+  # plt.figure(0, figsize = (17,10))
+  plt.figure(0)
+  plt.plot(np.arange(0, len(acc_train)), acc_train, label = 'Train')
+  plt.plot(np.arange(0,len(acc_train), FLAGS.eval_freq), acc_test, label = 'Test')
+  plt.xlabel('Epoch')
+  plt.ylabel('Accuracy')
+  plt.title('Accuracy of Train and Test Set Through Training')
+  plt.legend()
+  plt.savefig('Accuracy_basic1.png')
+  # plt.show()
 
+  # plt.figure(1, figsize=(17,10))
+  plt.figure(1)
+  plt.plot(np.arange(0, len(loss_train)), loss_train, label = 'Train')
+  plt.xlabel('Epoch')
+  plt.ylabel('Loss')
+  plt.title('Loss Through Training')
+  plt.savefig('Loss_basic1.png')
+  # plt.show()
+  # plt.legend()
   ########################
   # END OF YOUR CODE    #
   #######################
