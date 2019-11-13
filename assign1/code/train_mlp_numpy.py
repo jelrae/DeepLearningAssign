@@ -123,27 +123,27 @@ def train():
       test_acc.append(accuracy(y,t))
       print("The accuracy at step, " + str(i) + " is : " + str(test_acc[-1]))
 
-  #Plotting the accuracy of test and train:
-  # plt.figure(0, figsize = (17,10))
-  plt.figure(0)
-  plt.plot(np.arange(0, len(train_acc)), train_acc, label = 'Train')
-  plt.plot(np.arange(0,len(train_acc), FLAGS.eval_freq), test_acc, label = 'Test')
-  plt.xlabel('Epoch')
-  plt.ylabel('Accuracy')
-  plt.title('Accuracy of Train and Test Set Through Training')
-  plt.legend()
-  plt.savefig('Accuracy_basic1.png')
-  # plt.show()
-
-  # plt.figure(1, figsize=(17,10))
-  plt.figure(1)
-  plt.plot(np.arange(0, len(train_loss)), train_loss, label = 'Train')
-  plt.xlabel('Epoch')
-  plt.ylabel('Loss')
-  plt.title('Loss Through Training')
-  plt.savefig('Loss_basic1.png')
-  # plt.show()
+  # #Plotting the accuracy of test and train:
+  # # plt.figure(0, figsize = (17,10))
+  # plt.figure(0)
+  # plt.plot(np.arange(0, len(train_acc)), train_acc, label = 'Train')
+  # plt.plot(np.arange(0,len(train_acc), FLAGS.eval_freq), test_acc, label = 'Test')
+  # plt.xlabel('Epoch')
+  # plt.ylabel('Accuracy')
+  # plt.title('Accuracy of Train and Test Set Through Training')
   # plt.legend()
+  # plt.savefig('Accuracy_basic1.png')
+  # # plt.show()
+  #
+  # # plt.figure(1, figsize=(17,10))
+  # plt.figure(1)
+  # plt.plot(np.arange(0, len(train_loss)), train_loss, label = 'Train')
+  # plt.xlabel('Epoch')
+  # plt.ylabel('Loss')
+  # plt.title('Loss Through Training')
+  # plt.savefig('Loss_basic1.png')
+  # # plt.show()
+  # # plt.legend()
 
   ########################
   # END OF YOUR CODE    #

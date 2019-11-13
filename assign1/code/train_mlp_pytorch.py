@@ -11,6 +11,7 @@ import numpy as np
 import os
 from mlp_pytorch import MLP
 import cifar10_utils
+import torch.nn as nn
 
 # Default constants
 DNN_HIDDEN_UNITS_DEFAULT = '100'
@@ -82,17 +83,31 @@ def train():
   # PUT YOUR CODE HERE  #
   #######################
   # raise NotImplementedError
+  loss_train = []
+  acc_train = []
+  acc_test = []
+
+  loss_funct = nn.CrossEntropyLoss()
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
   cifar10_set = cifar10_utils.get_cifar10(FLAGS.data_dir)
+  #TODO make an optimizer
 
   x, y = cifar10_set['train'].next_batch(FLAGS.batch_size)
   x = x.reshape(FLAGS.batch_size, -1)
   out_dim = y.shape[1]
   in_dim = x.shape[1]
-  mlp = MLP(in_dim, dnn_hidden_units, out_dim, FLAGS.neg_slope)
+  mlp = MLP(in_dim, dnn_hidden_units, out_dim, FLAGS.neg_slope).to(device)
   for i in range(0, FLAGS.max_steps + 1):
     x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
-    x = x.reshape(FLAGS.batch_size, -1)
+    x = torch.tensor(x.reshape(FLAGS.batch_size, -1), dtype=torch.float32).to(device)
+    t = torch.tensor(y, dtype=torch.long).to(device)
+    y = mlp.forward(x)
+    loss = loss_funct(y,t)
+    loss_train.append(loss)
+    # Todo loss lackwards?
+    loss.backward()
+    #ToDo optimizer much?
+
 
   ########################
   # END OF YOUR CODE    #
