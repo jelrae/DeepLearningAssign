@@ -46,7 +46,8 @@ def accuracy(predictions, targets):
   ########################
   # PUT YOUR CODE HERE  #
   #######################
-  raise NotImplementedError
+  # raise NotImplementedError
+  accuracy = np.sum(np.argmax(predictions, axis=1) == np.argmax(targets, axis=1)) / targets.shape[0]
   ########################
   # END OF YOUR CODE    #
   #######################
@@ -75,11 +76,29 @@ def train():
 
   # Get negative slope parameter for LeakyReLU
   neg_slope = FLAGS.neg_slope
-  
+
+
   ########################
   # PUT YOUR CODE HERE  #
   #######################
-  raise NotImplementedError
+  # raise NotImplementedError
+  device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+  cifar10_set = cifar10_utils.get_cifar10(FLAGS.data_dir)
+
+  x, y = cifar10_set['train'].next_batch(FLAGS.batch_size)
+  x = x.reshape(FLAGS.batch_size, -1)
+  out_dim = y.shape[1]
+  in_dim = x.shape[1]
+  mlp = MLP(in_dim, )
+  for i in range(0, FLAGS.max_steps + 1):
+    x, y = cifar10_set['train'].next_batch(FLAGS.batch_size)
+    x = x.reshape(FLAGS.batch_size, -1)
+
+
+
+
+
+
   ########################
   # END OF YOUR CODE    #
   #######################

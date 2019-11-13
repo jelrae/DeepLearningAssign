@@ -87,7 +87,7 @@ def train():
   # PUT YOUR CODE HERE  #
   #######################
   #raise NotImplementedError
-
+  device = 'cuda' if torch.cuda.is_available() else 'cpu'
   #Load in data set
   cifar10_set = cifar10_utils.get_cifar10(FLAGS.data_dir)
   # Get Batches
@@ -116,7 +116,7 @@ def train():
     train_acc.append(accuracy(y,t))
     mlp.backward(loss_funct.backward(y,t))
     for mod in mlp.modules:
-      if type(mod) == LinearModule: #isinstance(mod, LinearModule):
+      if type(mod) == LinearModule:
         mod.params['weight'] -= FLAGS.learning_rate * mod.grads['weight']
         mod.params['bias'] -= FLAGS.learning_rate * mod.grads['bias']
     if i % FLAGS.eval_freq == 0:
