@@ -30,9 +30,9 @@ class LinearModule(object):
     self.grads = {'weight': None, 'bias': None}
 #    raise NotImplementedError
     self.params['weight'] = np.random.normal(loc=0.0, scale=0.0001, size=(out_features, in_features))
-    self.params['bias'] = np.zeros((out_features,1))
+    self.params['bias'] = np.zeros((out_features,))
     self.grads['weight'] = np.zeros(shape=(out_features, in_features))
-    self.grads['bias'] = np.zeros((out_features, 1))
+    self.grads['bias'] = np.zeros((out_features,))
 
 
     ########################
@@ -62,10 +62,6 @@ class LinearModule(object):
     # W is an l x l-1
     # b is an l x 1
     self.act = x
-    # print('This is for the forward')
-    # print(x.shape)
-    # print(self.params['weight'].shape)
-    # print(self.params['bias'].shape)
     out = x @ self.params['weight'].T + self.params['bias'].T  # shape (out x 1)
 
     ########################
@@ -93,11 +89,12 @@ class LinearModule(object):
     #######################
     #raise NotImplementedError
     # print('This is at the backwards')
-    # self.grads['weight'] = dout.T @ self.act
-    # self.grads['bias'] = np.sum(dout, axis=0)
-    # breakpoint()
     dx =  dout @ self.params['weight']
-    # print(dx.shape)
+
+    self.grads['weight'] = dout.T @ self.act
+    # self.grads['bias'] = np.sum(dout, axis=0).reshape([self.grads['bias'].shape[0],1])
+    self.grads['bias'] = np.sum(dout, axis=0)
+    # breakpoint()
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -124,8 +121,6 @@ class LeakyReLUModule(object):
     #######################
     #raise NotImplementedError
     self.n_slope = neg_slope
-    # self.input = None
-    # self.output = None
     self.act = None
     ########################
     # END OF YOUR CODE    #
@@ -209,7 +204,6 @@ class SoftMaxModule(object):
     # raise NotImplementedError
 
     mx = x.max(axis = 1, keepdims = True)
-    # print(mx)
     y = np.exp(x - mx)
     out = y / y.sum(axis = 1, keepdims = True)
     self.act = out
@@ -242,7 +236,6 @@ class SoftMaxModule(object):
     dxdx = dx_diag - dx_dot
     dx = np.einsum('ij,ijk -> ik', dout, dxdx)
 
-    # breakpoint()
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -271,7 +264,8 @@ class CrossEntropyModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
-    out = -np.sum(y*np.log(x))/y.shape[0]
+    # out = -np.sum(y*np.log(x))/y.shape[0]
+    out = -np.log(x[np.where(y)]).sum() / x.shape[0]
     self.loss = out
     ########################
     # END OF YOUR CODE    #

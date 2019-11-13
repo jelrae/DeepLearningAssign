@@ -14,6 +14,10 @@ from modules import CrossEntropyModule
 from modules import LinearModule #TODO IS THIS OK??????
 import cifar10_utils
 
+import matplotlib.pyplot as plt
+# import seaborn as sns
+# sns.set()
+
 # Default constants
 DNN_HIDDEN_UNITS_DEFAULT = '100'
 LEARNING_RATE_DEFAULT = 2e-3
@@ -49,7 +53,7 @@ def accuracy(predictions, targets):
   # PUT YOUR CODE HERE
   #######################
   # raise NotImplementedError
-  accuracy = np.sum(np.argmax(np.argmax(targets, axis = 1) == np.argmax(predictions, axis = 1)))/targets.shape[0]
+  accuracy = np.sum(np.argmax(predictions, axis=1) == np.argmax(targets, axis=1)) / targets.shape[0]
   ########################
   # END OF YOUR CODE    #
   #######################
@@ -90,10 +94,11 @@ def train():
   batches = []
 
   #Init tracking arrays
-  acc = []
-  loss = []
+  test_acc = []
+  train_loss = []
+  train_acc = []
 
-  for i in range(0, FLAGS.max_steps):
+  for i in range(0, FLAGS.max_steps+1):
     x,y = cifar10_set['train'].next_batch(FLAGS.batch_size)
     #print(x.shape)
     x = x.reshape(FLAGS.batch_size, -1)
@@ -104,10 +109,11 @@ def train():
   mlp = MLP(in_dim, dnn_hidden_units, out_dim, FLAGS.neg_slope)
   loss_funct = CrossEntropyModule()
 
-  for i in range(0, FLAGS.max_steps):
+  for i in range(0, FLAGS.max_steps+1):
     x,t = batches[i]
     y = mlp.forward(x)
-    loss.append(loss_funct.forward(y,t))
+    train_loss.append(loss_funct.forward(y,t))
+    train_acc.append(accuracy(y,t))
     mlp.backward(loss_funct.backward(y,t))
     for mod in mlp.modules:
       if type(mod) == LinearModule: #isinstance(mod, LinearModule):
@@ -116,11 +122,32 @@ def train():
     if i % FLAGS.eval_freq == 0:
       x,t = cifar10_set['test'].images, cifar10_set['test'].labels
       x = x.reshape(x.shape[0], -1)
-      # print(x.shape)
-      # print(t.shape)
-      y = mlp.forward(x)
-      acc.append(accuracy(y,t)*100)
-      print("The accuracy at step, " + str(i) + " is : " + str(acc[-1]))
+      y = mlp.forward(x),k
+      test_acc.append(accuracy(y,t))
+      print("The accuracy at step, " + str(i) + " is : " + str(test_acc[-1]))
+
+  #Plotting the accuracy of test and train:
+  # plt.figure(0, figsize = (17,10))
+  plt.figure(0)
+  plt.plot(np.arange(0, len(train_acc)), train_acc, label = 'Train')
+  plt.plot(np.arange(0,len(train_acc), FLAGS.eval_freq), test_acc, label = 'Test')
+  plt.xlabel('Epoch')
+  plt.ylabel('Accuracy')
+  plt.title('Accuracy of Train and Test Set Through Training')
+  plt.legend()
+  plt.savefig('Accuracy_basic1.png')
+  # plt.show()
+
+  # plt.figure(1, figsize=(17,10))
+  plt.figure(1)
+  plt.plot(np.arange(0, len(train_loss)), train_loss, label = 'Train')
+  plt.xlabel('Epoch')
+  plt.ylabel('Loss')
+  plt.title('Loss Through Training')
+  plt.savefig('Loss_basic1.png')
+  # plt.show()
+  # plt.legend()
+
   ########################
   # END OF YOUR CODE    #
   #######################
