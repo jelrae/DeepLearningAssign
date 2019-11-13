@@ -89,15 +89,10 @@ def train():
   x = x.reshape(FLAGS.batch_size, -1)
   out_dim = y.shape[1]
   in_dim = x.shape[1]
-  mlp = MLP(in_dim, )
+  mlp = MLP(in_dim, dnn_hidden_units, out_dim, FLAGS.neg_slope)
   for i in range(0, FLAGS.max_steps + 1):
-    x, y = cifar10_set['train'].next_batch(FLAGS.batch_size)
+    x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
     x = x.reshape(FLAGS.batch_size, -1)
-
-
-
-
-
 
   ########################
   # END OF YOUR CODE    #

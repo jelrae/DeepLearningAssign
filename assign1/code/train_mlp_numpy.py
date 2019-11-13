@@ -87,7 +87,6 @@ def train():
   # PUT YOUR CODE HERE  #
   #######################
   #raise NotImplementedError
-  device = 'cuda' if torch.cuda.is_available() else 'cpu'
   #Load in data set
   cifar10_set = cifar10_utils.get_cifar10(FLAGS.data_dir)
   # Get Batches
@@ -98,19 +97,17 @@ def train():
   train_loss = []
   train_acc = []
 
-  for i in range(0, FLAGS.max_steps+1):
-    x,y = cifar10_set['train'].next_batch(FLAGS.batch_size)
-    #print(x.shape)
-    x = x.reshape(FLAGS.batch_size, -1)
-    batches.append([x,y])
-  out_dim = batches[0][1].shape[1]
-  in_dim = batches[0][0].shape[1]
+  x, y = cifar10_set['train'].next_batch(FLAGS.batch_size)
+  x = x.reshape(FLAGS.batch_size, -1)
+  out_dim = y.shape[1]
+  in_dim = x.shape[1]
 
   mlp = MLP(in_dim, dnn_hidden_units, out_dim, FLAGS.neg_slope)
   loss_funct = CrossEntropyModule()
 
   for i in range(0, FLAGS.max_steps+1):
-    x,t = batches[i]
+    x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
+    x = x.reshape(FLAGS.batch_size, -1)
     y = mlp.forward(x)
     train_loss.append(loss_funct.forward(y,t))
     train_acc.append(accuracy(y,t))
@@ -122,7 +119,7 @@ def train():
     if i % FLAGS.eval_freq == 0:
       x,t = cifar10_set['test'].images, cifar10_set['test'].labels
       x = x.reshape(x.shape[0], -1)
-      y = mlp.forward(x),k
+      y = mlp.forward(x)
       test_acc.append(accuracy(y,t))
       print("The accuracy at step, " + str(i) + " is : " + str(test_acc[-1]))
 
