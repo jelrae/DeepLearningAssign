@@ -49,6 +49,7 @@ class MLP(nn.Module):
         cur_input = out_lay
     print('Adding output Linear')
     mods.append(nn.Linear(in_features=cur_input, out_features=n_classes))
+    print(len(mods))
     self.modls = nn.Sequential(*mods)
     # raise NotImplementedError
     ########################

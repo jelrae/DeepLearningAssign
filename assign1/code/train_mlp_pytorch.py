@@ -33,7 +33,7 @@ def accuracy(predictions, targets):
   """
   Computes the prediction accuracy, i.e. the average of correct predictions
   of the network.
-  
+
   Args:
     predictions: 2D float array of size [batch_size, n_classes]
     labels: 2D int array of size [batch_size, n_classes]
@@ -42,7 +42,7 @@ def accuracy(predictions, targets):
   Returns:
     accuracy: scalar float, the accuracy of predictions,
               i.e. the average correct predictions over the whole batch
-  
+
   TODO:
   Implement accuracy computation.
   """
@@ -61,7 +61,7 @@ def accuracy(predictions, targets):
 
 def train():
   """
-  Performs training and evaluation of MLP model. 
+  Performs training and evaluation of MLP model.
 
   TODO:
   Implement training and evaluation of MLP model. Evaluate your model on the whole test set each eval_freq iterations.
@@ -100,13 +100,28 @@ def train():
   # print(y.shape)
   out_dim = y.shape[1]
   in_dim = x.shape[1]
+  print(dnn_hidden_units)
+  for i in range(0,15):
+    dnn_hidden_units.append(100)
   mlp = MLP(in_dim, dnn_hidden_units, out_dim, neg_slope).to(device)
-  optimizer = torch.optim.SGD(mlp.parameters(), lr = FLAGS.learning_rate)
-  for i in range(0, FLAGS.max_steps + 1):
+  # optimizer = torch.optim.SGD(mlp.parameters(), lr = FLAGS.learning_rate)
+  print("Opt is Adam")
+  optimizer = torch.optim.Adam(mlp.parameters(), lr=1.5e-3)
+
+  #Adding regularization
+  reg_on = True
+  dropout_on = False
+  reg_const = 0.00001
+  steps = 1500
+  for i in range(0, steps + 1):
     x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
     x = torch.tensor(x.reshape(FLAGS.batch_size, -1), dtype=torch.float32).to(device)
     y = mlp.forward(x)
     loss = loss_funct(y,torch.LongTensor(np.argmax(t, 1)).to(device))
+    if reg_on:
+      for mod in mlp.modls:
+        if type(mod) == nn.Linear:
+          loss += loss + (torch.sum(torch.abs(mod.weight))*reg_const)
     loss_train.append(loss)
     acc_train.append(accuracy(y.cpu().detach().numpy(), t))
     optimizer.zero_grad()
@@ -116,8 +131,6 @@ def train():
       x,t = cifar10_set['test'].images, cifar10_set['test'].labels
       x = torch.tensor(x.reshape(x.shape[0], -1), dtype=torch.float32).to(device)
       y = mlp.forward(x)
-      # print(t.shape)
-      # print(y.shape)
       acc_test.append(accuracy(y.cpu().detach().numpy(),t))
       print("The accuracy at step, " + str(i) + " is : " + str(acc_test[-1]))
 
@@ -130,7 +143,7 @@ def train():
   plt.ylabel('Accuracy')
   plt.title('Accuracy of Train and Test Set Through Training')
   plt.legend()
-  plt.savefig('Accuracy_torch1.png')
+  plt.savefig('Accuracy_adam3000Reg_43_1_5.png')
   # plt.show()
 
   # plt.figure(1, figsize=(17,10))
@@ -139,7 +152,7 @@ def train():
   plt.xlabel('Epoch')
   plt.ylabel('Loss')
   plt.title('Loss Through Training')
-  plt.savefig('Loss_torch1.png')
+  plt.savefig('Loss_adam3000Reg_43_1_5.png')
   # plt.show()
   # plt.legend()
   ########################
