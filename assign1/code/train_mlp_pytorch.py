@@ -152,7 +152,7 @@ def train():
   plt.ylabel('Accuracy')
   plt.title('Accuracy of Train and Test Set Through Training')
   plt.legend()
-  plt.savefig('Accuracy_adam3000weight_decay_11_1_25.png')
+  plt.savefig('norm_Accuracy_adam3000weight_decay_11_1_25.png')
   # plt.show()
 
   # plt.figure(1, figsize=(17,10))
@@ -161,7 +161,7 @@ def train():
   plt.xlabel('Epoch')
   plt.ylabel('Loss')
   plt.title('Loss Through Training')
-  plt.savefig('Loss_adam3000weight_decay_11_1_25.png')
+  plt.savefig('norm_Loss_adam3000weight_decay_11_1_25.png')
   # plt.show()
   # plt.legend()
   ########################

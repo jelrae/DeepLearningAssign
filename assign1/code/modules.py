@@ -6,23 +6,23 @@ import numpy as np
 
 class LinearModule(object):
   """
-  Linear module. Applies a linear transformation to the input data. 
+  Linear module. Applies a linear transformation to the input data.
   """
   def __init__(self, in_features, out_features):
     """
-    Initializes the parameters of the module. 
-    
+    Initializes the parameters of the module.
+
     Args:
       in_features: size of each input sample
       out_features: size of each output sample
 
     TODO:
     Done - Initialize weights self.params['weight'] using normal distribution with mean = 0 and
-    std = 0.0001. Initialize biases self.params['bias'] with 0. 
-    
+    std = 0.0001. Initialize biases self.params['bias'] with 0.
+
     Done - Also, initialize gradients with zeros.
     """
-    
+
     ########################
     # PUT YOUR CODE HERE  #
     #######################
@@ -42,18 +42,18 @@ class LinearModule(object):
   def forward(self, x):
     """
     Forward pass.
-    
+
     Args:
       x: input to the module
     Returns:
       out: output of the module
-    
+
     TODO:
-    Implement forward pass of the module. 
-    
+    Implement forward pass of the module.
+
     Hint: You can store intermediate variables inside the object. They can be used in backward pass computation.                                                           #
     """
-    
+
     ########################
     # PUT YOUR CODE HERE  #
     #######################
@@ -78,10 +78,10 @@ class LinearModule(object):
       dout: gradients of the previous module
     Returns:
       dx: gradients with respect to the input of the module
-    
+
     TODO:
-    Implement backward pass of the module. Store gradient of the loss with respect to 
-    layer parameters in self.grads['weight'] and self.grads['bias']. 
+    Implement backward pass of the module. Store gradient of the loss with respect to
+    layer parameters in self.grads['weight'] and self.grads['bias'].
     """
 
     ########################
@@ -98,7 +98,7 @@ class LinearModule(object):
     ########################
     # END OF YOUR CODE    #
     #######################
-    
+
     return dx
 
 class LeakyReLUModule(object):
@@ -129,15 +129,15 @@ class LeakyReLUModule(object):
   def forward(self, x):
     """
     Forward pass.
-    
+
     Args:
       x: input to the module
     Returns:
       out: output of the module
-    
+
     TODO:
-    Implement forward pass of the module. 
-    
+    Implement forward pass of the module.
+
     Hint: You can store intermediate variables inside the object. They can be used in backward pass computation.                                                           #
     """
 
@@ -161,7 +161,7 @@ class LeakyReLUModule(object):
       dout: gradients of the previous module
     Returns:
       dx: gradients with respect to the input of the module
-    
+
     TODO:
     Implement backward pass of the module.
     """
@@ -173,7 +173,7 @@ class LeakyReLUModule(object):
     dx = dout * (self.act > 0 + self.n_slope * (self.act <= 0))
     ########################
     # END OF YOUR CODE    #
-    #######################    
+    #######################
 
     return dx
 
@@ -290,7 +290,9 @@ class CrossEntropyModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
-    dx = (-y / x)/y.shape[0]
+    # This works but aparently its less expensive to do multi
+    # dx = (-y / x)/y.shape[0]
+    dx = -y / (x * y.shape[0])
     #print(dx.shape)
     ########################
     # END OF YOUR CODE    #

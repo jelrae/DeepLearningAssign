@@ -7,6 +7,7 @@ from __future__ import division
 from __future__ import print_function
 
 import torch.nn as nn
+import custom_batchnorm as cbn
 
 class MLP(nn.Module):
   """
@@ -42,6 +43,8 @@ class MLP(nn.Module):
     cur_input = n_inputs
     if len(n_hidden) > 0:
       for out_lay in n_hidden:
+        # Comment this out if you dont want batch norm
+        mods.append(cbn.CustomBatchNormAutograd(cur_input))
         print('Adding Linear Model')
         mods.append(nn.Linear(in_features=cur_input, out_features=out_lay))
         print('Adding LeakyRElU')
@@ -58,14 +61,14 @@ class MLP(nn.Module):
 
   def forward(self, x):
     """
-    Performs forward pass of the input. Here an input tensor x is transformed through 
+    Performs forward pass of the input. Here an input tensor x is transformed through
     several layer transformations.
-    
+
     Args:
       x: input to the network
     Returns:
       out: outputs of the network
-    
+
     TODO:
     Implement forward pass of the network.
     """
