@@ -96,24 +96,32 @@ def train():
   cifar10_set = cifar10_utils.get_cifar10(FLAGS.data_dir)
 
   x, y = cifar10_set['train'].next_batch(FLAGS.batch_size)
-  print("The size of the dataset is: " + str(cifar10_set['train'].shape))
+  print("The size of the dataset is: " + str(cifar10_set['train'].num_examples))
   x = x.reshape(FLAGS.batch_size, -1)
-  # print(y.shape)
+
   out_dim = y.shape[1]
   in_dim = x.shape[1]
+  hu = 4
+  dnn_hidden_units[0] = 600
+  for i in range(0,hu):
+    dnn_hidden_units.append(int(500-(450*(i/hu))))
   print(dnn_hidden_units)
-  for i in range(0,3):
-    dnn_hidden_units.append(100)
   mlp = MLP(in_dim, dnn_hidden_units, out_dim, neg_slope).to(device)
   # optimizer = torch.optim.SGD(mlp.parameters(), lr = FLAGS.learning_rate)
   print("Opt is Adam")
-  optimizer = torch.optim.Adam(mlp.parameters(), lr=1.5e-3, weight_decay = 4e-3  )
+  optimizer = torch.optim.Adam(mlp.parameters(), lr=1.5e-3, weight_decay = 1e-6)
+  #, weight_decay = 4e-3
 
   #Adding regularization
   reg_on = False
   dropout_on = False
   reg_const = 0.00001
   steps = 2000
+  #steps = (cifar10_set['train'].num_examples/FLAGS.batch_size) * 2
+  # dataset is size 50,000
+  #print(steps)
+  # dataset is size 50,000
+
   for i in range(0, steps + 1):
     x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
     x = torch.tensor(x.reshape(FLAGS.batch_size, -1), dtype=torch.float32).to(device)
