@@ -22,12 +22,12 @@ class CustomBatchNormAutograd(nn.Module):
 
   def __init__(self, n_neurons, eps=1e-5):
     """
-    Initializes CustomBatchNormAutograd object. 
-    
+    Initializes CustomBatchNormAutograd object.
+
     Args:
       n_neurons: int specifying the number of neurons
       eps: small float to be added to the variance for stability
-    
+
     TODO:
       Save parameters for the number of neurons and eps.
       Initialize parameters gamma and beta via nn.Parameter
@@ -37,7 +37,12 @@ class CustomBatchNormAutograd(nn.Module):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-
+    self.n_neurons = n_neurons
+    self.eps = eps
+    #Initializing variance as 1 beccause why not
+    self.gamma = nn.Parameter(torch.ones(n_neurons))
+    #initializing with 0 mean
+    self.beta = nn.Parameter(torch.zeros(n_neurons))
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -45,12 +50,12 @@ class CustomBatchNormAutograd(nn.Module):
   def forward(self, input):
     """
     Compute the batch normalization
-    
+
     Args:
       input: input tensor of shape (n_batch, n_neurons)
     Returns:
       out: batch-normalized tensor
-    
+
     TODO:
       Check for the correctness of the shape of the input tensor.
       Implement batch normalization forward pass as given in the assignment.
@@ -60,7 +65,14 @@ class CustomBatchNormAutograd(nn.Module):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
+    if len(input.shape) != 2:
+        raise ValueError('Only dense allowed')
+    if input.shape[1] != self.n_neurons:
+        raise ValueError('Wrong input size ' + str(input.shape[1]) + '  Should be ' +str(self.n_neurons))
 
+    var = input.var(0, unbiased = True)
+    x = (input - input.mean(0))/((var + self.eps).sqrt())
+    out = self.gamma * x + self.beta
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -91,7 +103,7 @@ class CustomBatchNormManualFunction(torch.autograd.Function):
   def forward(ctx, input, gamma, beta, eps=1e-5):
     """
     Compute the batch normalization
-    
+
     Args:
       ctx: context object handling storing and retrival of tensors and constants and specifying
            whether tensors need gradients in backward pass
@@ -126,13 +138,13 @@ class CustomBatchNormManualFunction(torch.autograd.Function):
   def backward(ctx, grad_output):
     """
     Compute backward pass of the batch normalization.
-    
+
     Args:
       ctx: context object handling storing and retrival of tensors and constants and specifying
            whether tensors need gradients in backward pass
     Returns:
       out: tuple containing gradients for all input arguments
-    
+
     TODO:
       Retrieve saved tensors and constants via ctx.saved_tensors and ctx.constant
       Compute gradients for inputs where ctx.needs_input_grad[idx] is True. Set gradients for other
@@ -166,11 +178,11 @@ class CustomBatchNormManualModule(nn.Module):
   def __init__(self, n_neurons, eps=1e-5):
     """
     Initializes CustomBatchNormManualModule object.
-    
+
     Args:
       n_neurons: int specifying the number of neurons
       eps: small float to be added to the variance for stability
-    
+
     TODO:
       Save parameters for the number of neurons and eps.
       Initialize parameters gamma and beta via nn.Parameter
@@ -188,12 +200,12 @@ class CustomBatchNormManualModule(nn.Module):
   def forward(self, input):
     """
     Compute the batch normalization via CustomBatchNormManualFunction
-    
+
     Args:
       input: input tensor of shape (n_batch, n_neurons)
     Returns:
       out: batch-normalized tensor
-    
+
     TODO:
       Check for the correctness of the shape of the input tensor.
       Instantiate a CustomBatchNormManualFunction.

@@ -35,7 +35,7 @@ def accuracy(predictions, targets):
   """
   Computes the prediction accuracy, i.e. the average of correct predictions
   of the network.
-  
+
   Args:
     predictions: 2D float array of size [batch_size, n_classes]
     labels: 2D int array of size [batch_size, n_classes]
@@ -44,7 +44,7 @@ def accuracy(predictions, targets):
   Returns:
     accuracy: scalar float, the accuracy of predictions,
               i.e. the average correct predictions over the whole batch
-  
+
   TODO:
   Implement accuracy computation.
   """
@@ -62,7 +62,7 @@ def accuracy(predictions, targets):
 
 def train():
   """
-  Performs training and evaluation of MLP model. 
+  Performs training and evaluation of MLP model.
 
   TODO:
   Implement training and evaluation of MLP model. Evaluate your model on the whole test set each eval_freq iterations.
@@ -126,8 +126,8 @@ def train():
   #Plotting the accuracy of test and train:
   # plt.figure(0, figsize = (17,10))
   plt.figure(0)
-  plt.plot(np.arange(0, len(train_acc)), train_acc, label = 'Train')
-  plt.plot(np.arange(0,len(train_acc), FLAGS.eval_freq), test_acc, label = 'Test')
+  plt.plot(np.arange(0, len(train_acc))/FLAGS.batch_size, train_acc, label = 'Train')
+  plt.plot(np.arange(0,len(train_acc))/FLAGS.batch_size, FLAGS.eval_freq), test_acc, label = 'Test')
   plt.xlabel('Epoch')
   plt.ylabel('Accuracy')
   plt.title('Accuracy of Train and Test Set Through Training')
@@ -137,7 +137,7 @@ def train():
 
   # plt.figure(1, figsize=(17,10))
   plt.figure(1)
-  plt.plot(np.arange(0, len(train_loss)), train_loss, label = 'Train')
+  plt.plot(np.arange(0, len(train_loss))/FLAGS.batch_size, train_loss, label = 'Train')
   plt.xlabel('Epoch')
   plt.ylabel('Loss')
   plt.title('Loss Through Training')

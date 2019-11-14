@@ -116,7 +116,7 @@ def train():
   reg_on = False
   dropout_on = False
   reg_const = 0.00001
-  steps = 2000
+  # steps = 500
   steps = int((cifar10_set['train'].num_examples/FLAGS.batch_size) * 12)
   # dataset is size 50,000
   #print(steps)
@@ -146,8 +146,8 @@ def train():
   #Plotting the accuracy of test and train:
   # plt.figure(0, figsize = (17,10))
   plt.figure(0)
-  plt.plot(np.arange(0, len(acc_train)), acc_train, label = 'Train')
-  plt.plot(np.arange(0,len(acc_train), FLAGS.eval_freq), acc_test, label = 'Test')
+  plt.plot(np.arange(0, len(acc_train))/FLAGS.batch_size, acc_train, label = 'Train')
+  plt.plot(np.arange(0,len(acc_train), FLAGS.eval_freq)/FLAGS.batch_size, acc_test, label = 'Test')
   plt.xlabel('Epoch')
   plt.ylabel('Accuracy')
   plt.title('Accuracy of Train and Test Set Through Training')
@@ -157,7 +157,7 @@ def train():
 
   # plt.figure(1, figsize=(17,10))
   plt.figure(1)
-  plt.plot(np.arange(0, len(loss_train)), loss_train, label = 'Train')
+  plt.plot(np.arange(0, len(loss_train))/FLAGS.batch_size, loss_train, label = 'Train')
   plt.xlabel('Epoch')
   plt.ylabel('Loss')
   plt.title('Loss Through Training')
