@@ -91,7 +91,6 @@ def train():
   acc_train = []
   acc_test = []
 
-  loss_funct = nn.CrossEntropyLoss()
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
   cifar10_set = cifar10_utils.get_cifar10(FLAGS.data_dir)
 
@@ -110,6 +109,7 @@ def train():
   # optimizer = torch.optim.SGD(mlp.parameters(), lr = FLAGS.learning_rate)
   print("Opt is Adam")
   optimizer = torch.optim.Adam(mlp.parameters(), lr=1.25e-3, weight_decay = 1e-6)
+  loss_funct = nn.CrossEntropyLoss()
   #, weight_decay = 4e-3
 
   #Adding regularization
