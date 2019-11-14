@@ -96,23 +96,24 @@ def train():
   cifar10_set = cifar10_utils.get_cifar10(FLAGS.data_dir)
 
   x, y = cifar10_set['train'].next_batch(FLAGS.batch_size)
+  print("The size of the dataset is: " + str(cifar10_set['train'].shape))
   x = x.reshape(FLAGS.batch_size, -1)
   # print(y.shape)
   out_dim = y.shape[1]
   in_dim = x.shape[1]
   print(dnn_hidden_units)
-  for i in range(0,15):
+  for i in range(0,3):
     dnn_hidden_units.append(100)
   mlp = MLP(in_dim, dnn_hidden_units, out_dim, neg_slope).to(device)
   # optimizer = torch.optim.SGD(mlp.parameters(), lr = FLAGS.learning_rate)
   print("Opt is Adam")
-  optimizer = torch.optim.Adam(mlp.parameters(), lr=1.5e-3)
+  optimizer = torch.optim.Adam(mlp.parameters(), lr=1.5e-3, weight_decay = 4e-3  )
 
   #Adding regularization
-  reg_on = True
+  reg_on = False
   dropout_on = False
   reg_const = 0.00001
-  steps = 1500
+  steps = 2000
   for i in range(0, steps + 1):
     x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
     x = torch.tensor(x.reshape(FLAGS.batch_size, -1), dtype=torch.float32).to(device)
@@ -143,7 +144,7 @@ def train():
   plt.ylabel('Accuracy')
   plt.title('Accuracy of Train and Test Set Through Training')
   plt.legend()
-  plt.savefig('Accuracy_adam3000Reg_43_1_5.png')
+  plt.savefig('Accuracy_adam2000_9_1_5.png')
   # plt.show()
 
   # plt.figure(1, figsize=(17,10))
@@ -152,7 +153,7 @@ def train():
   plt.xlabel('Epoch')
   plt.ylabel('Loss')
   plt.title('Loss Through Training')
-  plt.savefig('Loss_adam3000Reg_43_1_5.png')
+  plt.savefig('Loss_adam2000_9_1_5.png')
   # plt.show()
   # plt.legend()
   ########################
