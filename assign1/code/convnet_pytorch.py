@@ -6,6 +6,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import torch.nn as nn
+
 class ConvNet(nn.Module):
   """
   This class implements a Convolutional Neural Network in PyTorch.
@@ -30,11 +32,14 @@ class ConvNet(nn.Module):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
+    super(ConvNet, self).__init__()
     mp = {'stride': 2, 'padding': 1, 'kernel': 3}
     conv = {'stride': 1, 'padding': 1, 'kernel': 3}
     size = [64,128,256,512]
+    print(size[3])
+    print(n_classes)
 
-    self,mods = nn.Sequential(
+    self.mods = nn.Sequential(
     nn.Conv2d(n_channels, size[0],kernel_size= conv['kernel'], stride=conv['stride'], padding=conv['padding']),
     nn.BatchNorm2d(size[0]),
     nn.ReLU(),
@@ -64,7 +69,7 @@ class ConvNet(nn.Module):
     nn.BatchNorm2d(size[3]),
     nn.ReLU(),
     nn.Conv2d(size[3], size[3],kernel_size= mp['kernel'], stride=mp['stride'], padding=mp['padding']),
-    nn.Linear(in_features=size[3], out_features=n_classes)
+    nn.Linear(size[3], n_classes)
     )
 
     ########################

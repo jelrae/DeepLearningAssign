@@ -12,6 +12,9 @@ import os
 from convnet_pytorch import ConvNet
 import cifar10_utils
 
+import torch
+import torch.nn as nn
+
 # Default constants
 LEARNING_RATE_DEFAULT = 1e-4
 BATCH_SIZE_DEFAULT = 32
@@ -77,7 +80,7 @@ def train():
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
   cifar10_set = cifar10_utils.get_cifar10(FLAGS.data_dir)
 
-  _, n_outputs =  cifar10['train']._labels.shape
+  _, n_outputs =  cifar10_set['train']._labels.shape
 
   cnn = ConvNet(3,n_outputs).to(device)
   optimizer = torch.optim.Adam(cnn.parameters(), lr=FLAGS.learning_rate)
@@ -85,7 +88,7 @@ def train():
 
   for i in range(0, FLAGS.max_steps+1):
     x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
-    x = torch.tensor(x.reshape(FLAGS.batch_size, -1), dtype=torch.float32).to(device)
+    x = torch.tensor(x, dtype=torch.float32).to(device)
     y = cnn.forward(x)
     loss = loss_funct(y,torch.LongTensor(np.argmax(t, 1)).to(device))
     optimizer.zero_grad()
