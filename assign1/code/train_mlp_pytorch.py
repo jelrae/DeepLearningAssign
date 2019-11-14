@@ -109,7 +109,7 @@ def train():
   mlp = MLP(in_dim, dnn_hidden_units, out_dim, neg_slope).to(device)
   # optimizer = torch.optim.SGD(mlp.parameters(), lr = FLAGS.learning_rate)
   print("Opt is Adam")
-  optimizer = torch.optim.Adam(mlp.parameters(), lr=1.5e-3, weight_decay = 1e-6)
+  optimizer = torch.optim.Adam(mlp.parameters(), lr=1.25e-3, weight_decay = 1e-6)
   #, weight_decay = 4e-3
 
   #Adding regularization
@@ -117,7 +117,7 @@ def train():
   dropout_on = False
   reg_const = 0.00001
   steps = 2000
-  #steps = (cifar10_set['train'].num_examples/FLAGS.batch_size) * 2
+  steps = int((cifar10_set['train'].num_examples/FLAGS.batch_size) * 12)
   # dataset is size 50,000
   #print(steps)
   # dataset is size 50,000
@@ -152,7 +152,7 @@ def train():
   plt.ylabel('Accuracy')
   plt.title('Accuracy of Train and Test Set Through Training')
   plt.legend()
-  plt.savefig('Accuracy_adam2000_9_1_5.png')
+  plt.savefig('Accuracy_adam3000weight_decay_11_1_25.png')
   # plt.show()
 
   # plt.figure(1, figsize=(17,10))
@@ -161,7 +161,7 @@ def train():
   plt.xlabel('Epoch')
   plt.ylabel('Loss')
   plt.title('Loss Through Training')
-  plt.savefig('Loss_adam2000_9_1_5.png')
+  plt.savefig('Loss_adam3000weight_decay_11_1_25.png')
   # plt.show()
   # plt.legend()
   ########################
