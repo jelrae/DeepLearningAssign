@@ -109,14 +109,15 @@ def train():
     x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
     x = x.reshape(FLAGS.batch_size, -1)
     y = mlp.forward(x)
-    train_loss.append(loss_funct.forward(y,t))
-    train_acc.append(accuracy(y,t))
+    loss = loss_funct.forward(y,t)
     mlp.backward(loss_funct.backward(y,t))
     for mod in mlp.modules:
       if type(mod) == LinearModule:
         mod.params['weight'] -= FLAGS.learning_rate * mod.grads['weight']
         mod.params['bias'] -= FLAGS.learning_rate * mod.grads['bias']
     if i % FLAGS.eval_freq == 0:
+      train_loss.append(loss)
+      train_acc.append(accuracy(y,t))
       x,t = cifar10_set['test'].images, cifar10_set['test'].labels
       x = x.reshape(x.shape[0], -1)
       y = mlp.forward(x)

@@ -131,12 +131,12 @@ def train():
       for mod in mlp.modls:
         if type(mod) == nn.Linear:
           loss += loss + (torch.sum(torch.abs(mod.weight))*reg_const)
-    loss_train.append(loss)
-    acc_train.append(accuracy(y.cpu().detach().numpy(), t))
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
     if i % FLAGS.eval_freq == 0:
+      loss_train.append(loss)
+      acc_train.append(accuracy(y.cpu().detach().numpy(), t))
       x,t = cifar10_set['test'].images, cifar10_set['test'].labels
       x = torch.tensor(x.reshape(x.shape[0], -1), dtype=torch.float32).to(device)
       y = mlp.forward(x)

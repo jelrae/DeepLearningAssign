@@ -40,9 +40,9 @@ class CustomBatchNormAutograd(nn.Module):
     self.n_neurons = n_neurons
     self.eps = eps
     #Initializing variance as 1 beccause why not
-    self.gamma = nn.Parameter(torch.ones(n_neurons))
+    self.gamma = nn.Parameter(torch.ones(n_neurons,))
     #initializing with 0 mean
-    self.beta = nn.Parameter(torch.zeros(n_neurons))
+    self.beta = nn.Parameter(torch.zeros(n_neurons,))
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -126,7 +126,11 @@ class CustomBatchNormManualFunction(torch.autograd.Function):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-
+    # v = torch.var(input, dim=0, unbiased=False)
+    i_var = 1 / torch.sqrt(torch.var(input, dim=0, unbiased=False) + eps)
+    x = (input - torch.mean(input, dim=0)) * i_var
+    out = x * gamma + beta
+    ctx.save_for_backward(x, i_var, gamma)
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -154,7 +158,14 @@ class CustomBatchNormManualFunction(torch.autograd.Function):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
+    x_h, i_var, g = ctx.saved_tensors
+    B = grad_output.shape[0]
+    dxh = grad_output * g
 
+    # compute gradients
+    grad_input = (1. / B) * i_var * (B*dxh - torch.sum(dxh, dim=0) - x_h*torch.sum(dxh*x_h, dim=0))
+    grad_beta = torch.sum(grad_output, dim=0)
+    grad_gamma = torch.sum(x_h*grad_output, dim=0)
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -192,7 +203,12 @@ class CustomBatchNormManualModule(nn.Module):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-
+    self.n_neurons = n_neurons
+    self.eps = eps
+    #Initializing variance as 1 beccause why not
+    self.gamma = nn.Parameter(torch.ones(n_neurons,))
+    #initializing with 0 mean
+    self.beta = nn.Parameter(torch.zeros(n_neurons,))
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -215,15 +231,18 @@ class CustomBatchNormManualModule(nn.Module):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
+    if len(input.shape) != 2:
+        raise ValueError('Only dense allowed')
+    if input.shape[1] != self.n_neurons:
+        raise ValueError('Wrong input size ' + str(input.shape[1]) + '  Should be ' +str(self.n_neurons))
 
+    b_n = CustomBatchNormManualFunction()
+    out = b_n.apply(input, self.gamma, self.beta, self.eps)
     ########################
     # END OF YOUR CODE    #
     #######################
 
     return out
-
-
-
 
 
 
