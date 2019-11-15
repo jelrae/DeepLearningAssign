@@ -87,10 +87,8 @@ def train():
   # PUT YOUR CODE HERE  #
   #######################
   # raise NotImplementedError
-  loss_train = []
-  acc_train = []
-  acc_test = []
-  acc_param_sreach = []
+
+  acc_param_search = []
 
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
   cifar10_set = cifar10_utils.get_cifar10(FLAGS.data_dir)
@@ -103,79 +101,91 @@ def train():
   in_dim = x.shape[1]
 
   hu = 4
-  lr = 1e-2
-  wd = 5e-5
+  lr_list = [1e-2, 1.5e-3, 1.25e-3, 1e-3 , 1e-4]
+  wd_list = [1e-4, 5e-4, 1e-5, 5e-5]
   dnn_hidden_units[0] = 600
-  for i in range(0,hu):
-    dnn_hidden_units.append(int(500-(450*(i/hu))))
-  print(dnn_hidden_units)
-  mlp = MLP(in_dim, dnn_hidden_units, out_dim, neg_slope).to(device)
-  #print('This is SGD')
-  # optimizer = torch.optim.SGD(mlp.parameters(), lr = FLAGS.learning_rate)
-  print("Opt is Adam")
-  # optimizer = torch.optim.Adam(mlp.parameters(), lr = FLAGS.learning_rate)
-  optimizer = torch.optim.Adam(mlp.parameters(),lr = lr, weight_decay = wd)
-  #  lr=1.25e-3
-  loss_funct = nn.CrossEntropyLoss()
+  for i in range(0, hu):
+    dnn_hidden_units.append(int(500 - (450 * (i / hu))))
+  for lr in lr_list:
+    for wd in wd_list:
+      loss_train = []
+      acc_train = []
+      acc_test = []
+      print('Testing Parameters layers ' + str((hu * 2) + 3) + '_learning_rate_' + str(
+        lr) + '_weightdecay_' + str(wd))
+      max_acc = 0
 
-  #Adding regularization
-  reg_on = False
-  dropout_on = False
-  reg_const = 0.00001
-  # steps = 500
-  steps = int((cifar10_set['train'].num_examples/FLAGS.batch_size) * 16)
-  # dataset is size 50,000
-  #print(steps)
-  # dataset is size 50,000
+      mlp = MLP(in_dim, dnn_hidden_units, out_dim, neg_slope).to(device)
+      #print('This is SGD')
+      # optimizer = torch.optim.SGD(mlp.parameters(), lr = FLAGS.learning_rate)
+      print("Opt is Adam")
+      # optimizer = torch.optim.Adam(mlp.parameters(), lr = FLAGS.learning_rate)
+      optimizer = torch.optim.Adam(mlp.parameters(),lr = lr, weight_decay = wd)
+      #  lr=1.25e-3
+      loss_funct = nn.CrossEntropyLoss()
 
-  for i in range(0, steps + 1):
-    x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
-    x = torch.tensor(x.reshape(FLAGS.batch_size, -1), dtype=torch.float32).to(device)
-    y = mlp.forward(x)
-    loss = loss_funct(y,torch.LongTensor(np.argmax(t, 1)).to(device))
-    if reg_on:
-      for mod in mlp.modls:
-        if type(mod) == nn.Linear:
-          loss += loss + (torch.sum(torch.abs(mod.weight))*reg_const)
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
-    if i % FLAGS.eval_freq == 0:
-      loss_train.append(loss)
-      acc_train.append(accuracy(y.cpu().detach().numpy(), t))
-      x,t = cifar10_set['test'].images, cifar10_set['test'].labels
-      x = torch.tensor(x.reshape(x.shape[0], -1), dtype=torch.float32).to(device)
-      y = mlp.forward(x)
-      acc_test.append(accuracy(y.cpu().detach().numpy(),t))
-      print("The accuracy at step, " + str(i) + " is : " + str(acc_test[-1]))
+      #Adding regularization
+      reg_on = False
+      dropout_on = False
+      reg_const = 0.00001
+      # steps = 500
+      steps = int((cifar10_set['train'].num_examples/FLAGS.batch_size) * 10)
+      # dataset is size 50,000
+      print(steps)
+      # dataset is size 50,000
 
-  #Plotting the accuracy of test and train:
-  # plt.figure(0, figsize = (17,10))
-  plt.figure(0)
-  plt.plot(np.arange(0, len(acc_train) * FLAGS.eval_freq * FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size) / cifar10_set['train'].num_examples, acc_train, label='Train')
-  plt.plot(np.arange(0, len(acc_train) * FLAGS.eval_freq* FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size) / cifar10_set['train'].num_examples, acc_test, label='Test')
-  plt.xlabel('Epoch')
-  plt.ylabel('Accuracy')
-  plt.title('Accuracy of Train and Test Set Through Training')
-  plt.legend()
-  acc_loc = 'loss_adam_' + str((hu*2)+3) + '_learning_rate_' + str(lr) +'_weightdecay_' + str(wd) +'.png'
-  plt.savefig(acc_loc)
-  # plt.show()
+      for i in range(0, steps + 1):
+        x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
+        x = torch.tensor(x.reshape(FLAGS.batch_size, -1), dtype=torch.float32).to(device)
+        y = mlp.forward(x)
+        loss = loss_funct(y,torch.LongTensor(np.argmax(t, 1)).to(device))
+        if reg_on:
+          for mod in mlp.modls:
+            if type(mod) == nn.Linear:
+              loss += loss + (torch.sum(torch.abs(mod.weight))*reg_const)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        if i % FLAGS.eval_freq == 0:
+          loss_train.append(loss)
+          acc_train.append(accuracy(y.cpu().detach().numpy(), t))
+          x,t = cifar10_set['test'].images, cifar10_set['test'].labels
+          x = torch.tensor(x.reshape(x.shape[0], -1), dtype=torch.float32).to(device)
+          y = mlp.forward(x)
+          acc_test.append(accuracy(y.cpu().detach().numpy(),t))
+      max_acc = np.array(acc_test).max()
+      print('The max found for these settings: layers ' + str((hu*2)+3) + '_learning_rate_' + str(lr) +'_weightdecay_' + str(wd) + 'was :' +str(max_acc))
+      acc_param_search.append(max_acc)
 
-  # plt.figure(1, figsize=(17,10))
-  plt.figure(1)
-  plt.plot(np.arange(0, len(loss_train)*FLAGS.eval_freq* FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size)/cifar10_set['train'].num_examples, loss_train, label = 'Train')
-  plt.xlabel('Epoch')
-  plt.ylabel('Loss')
-  plt.title('Loss Through Training')
-  loss_loc = 'loss_adam_' + str((hu * 2) + 3) + '_learning_rate_' + str(lr) + '_weightdecay_' + str(wd) + '.png'
-  plt.savefig(loss_loc)
-  # plt.show()
-  # plt.legend()
-  ########################
-  # END OF YOUR CODE    #
-  #######################
 
+      #Plotting the accuracy of test and train:
+      # plt.figure(0, figsize = (17,10))
+      plt.figure(0)
+      plt.plot(np.arange(0, len(acc_train) * FLAGS.eval_freq * FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size) / cifar10_set['train'].num_examples, acc_train, label='Train')
+      plt.plot(np.arange(0, len(acc_train) * FLAGS.eval_freq* FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size) / cifar10_set['train'].num_examples, acc_test, label='Test')
+      plt.xlabel('Epoch')
+      plt.ylabel('Accuracy')
+      plt.title('Accuracy of Train and Test Set Through Training')
+      plt.legend()
+      acc_loc = 'figs/loss_adam_' + str((hu*2)+3) + '_learning_rate_' + str(lr) +'_weightdecay_' + str(wd) +'.png'
+      plt.savefig(acc_loc)
+      # plt.show()
+
+      # plt.figure(1, figsize=(17,10))
+      plt.figure(1)
+      plt.plot(np.arange(0, len(loss_train)*FLAGS.eval_freq* FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size)/cifar10_set['train'].num_examples, loss_train, label = 'Train')
+      plt.xlabel('Epoch')
+      plt.ylabel('Loss')
+      plt.title('Loss Through Training')
+      loss_loc = 'figs/loss_adam_' + str((hu * 2) + 3) + '_learning_rate_' + str(lr) + '_weightdecay_' + str(wd) + '.png'
+      plt.savefig(loss_loc)
+      # plt.show()
+      # plt.legend()
+      ########################
+      # END OF YOUR CODE    #
+      #######################
+  print(acc_param_search)
+  np.save(acc_grid_srch_4, acc_param_search)
 def print_flags():
   """
   Prints all entries in FLAGS variable.
