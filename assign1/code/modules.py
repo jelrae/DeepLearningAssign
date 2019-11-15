@@ -264,8 +264,7 @@ class CrossEntropyModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
-    # out = -np.sum(y*np.log(x))/y.shape[0]
-    out = -np.log(x[np.where(y)]).sum() / x.shape[0]
+    out = -np.sum(y*np.log(x))/y.shape[0]
     self.loss = out
     ########################
     # END OF YOUR CODE    #

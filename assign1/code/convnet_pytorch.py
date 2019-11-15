@@ -66,9 +66,7 @@ class ConvNet(nn.Module):
     nn.Conv2d(size[3], size[3],kernel_size= conv['kernel'], stride=conv['stride'], padding=conv['padding']),
     nn.BatchNorm2d(size[3]),
     nn.ReLU(),
-    nn.Conv2d(size[3], size[3],kernel_size= mp['kernel'], stride=mp['stride'], padding=mp['padding']),
-    nn.BatchNorm2d(size[3]),
-    nn.ReLU()
+    nn.Conv2d(size[3], size[3],kernel_size= mp['kernel'], stride=mp['stride'], padding=mp['padding'])
     )
     self.lin = nn.Linear(size[3], n_classes)
 

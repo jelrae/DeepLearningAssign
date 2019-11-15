@@ -14,6 +14,7 @@ import cifar10_utils
 
 import torch
 import torch.nn as nn
+import matplotlib.pyplot as plt
 
 # Default constants
 LEARNING_RATE_DEFAULT = 1e-4
@@ -85,7 +86,7 @@ def train():
   cnn = ConvNet(3,n_outputs).to(device)
   optimizer = torch.optim.Adam(cnn.parameters(), lr=FLAGS.learning_rate)
   loss_funct = nn.CrossEntropyLoss()
-
+  print(FLAGS.max_steps)
   for i in range(0, FLAGS.max_steps+1):
     x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
     x = torch.tensor(x, dtype=torch.float32).to(device)
@@ -101,7 +102,7 @@ def train():
       acc_train.append(accuracy(y.cpu().detach().numpy(), t))
       # x,t = cifar10_set['test'].images, cifar10_set['test'].labels
       # x = torch.tensor(x, dtype=torch.float32).to(device)
-      for i in range(0, int(cifar10_set['test']._num_examples/50)):
+      for j in range(0, int(cifar10_set['test']._num_examples/50)):
         x, t = cifar10_set['train'].next_batch(50)
         x = torch.tensor(x, dtype=torch.float32).to(device)
         y = cnn.forward(x)
@@ -118,7 +119,7 @@ def train():
   plt.ylabel('Accuracy')
   plt.title('Accuracy of Train and Test Set Through Training')
   plt.legend()
-  plt.savefig('cnn_accuracy.png')
+  plt.savefig('cnn_accuracy_correct.png')
   # plt.show()
 
   # plt.figure(1, figsize=(17,10))
@@ -127,7 +128,7 @@ def train():
   plt.xlabel('Epoch')
   plt.ylabel('Loss')
   plt.title('Loss Through Training')
-  plt.savefig('cnn_loss.png')
+  plt.savefig('cnn_loss_correct.png')
   # plt.show()
   # plt.legend()
   ########################
