@@ -103,8 +103,8 @@ def train():
   in_dim = x.shape[1]
 
   hu = 4
-  lr = 1e-2
-  wd = 5e-5
+  lr = 1e-4
+  wd = 5e-4
   dnn_hidden_units[0] = 600
   for i in range(0,hu):
     dnn_hidden_units.append(int(500-(450*(i/hu))))
@@ -158,7 +158,7 @@ def train():
   plt.ylabel('Accuracy')
   plt.title('Accuracy of Train and Test Set Through Training')
   plt.legend()
-  acc_loc = 'loss_adam_' + str((hu*2)+3) + '_learning_rate_' + str(lr) +'_weightdecay_' + str(wd) +'.png'
+  acc_loc = 'acc_adam_' + str((hu*2)+3) + '_learning_rate_' + str(lr) +'_weightdecay_' + str(wd) +'.png'
   plt.savefig(acc_loc)
   # plt.show()
 
