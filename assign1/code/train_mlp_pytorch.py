@@ -87,21 +87,25 @@ def train():
   # PUT YOUR CODE HERE  #
   #######################
   # raise NotImplementedError
+
+  # Basic delarations and pulling in initial data
   loss_train = []
   acc_train = []
   acc_test = []
-  acc_param_sreach = []
 
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
   cifar10_set = cifar10_utils.get_cifar10(FLAGS.data_dir)
 
-  x, y = cifar10_set['train'].next_batch(FLAGS.batch_size)
+  x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
   print("The size of the dataset is: " + str(cifar10_set['train'].num_examples))
   x = x.reshape(FLAGS.batch_size, -1)
-
-  out_dim = y.shape[1]
+  #Get them shapes
+  out_dim = t.shape[1]
   in_dim = x.shape[1]
 
+  x = torch.tensor(x, dtype=torch.float32).to(device)
+
+  #Parameters to be used in model
   hu = 4
   lr = 1e-4
   wd = 5e-4
@@ -110,25 +114,44 @@ def train():
     dnn_hidden_units.append(int(500-(450*(i/hu))))
   print(dnn_hidden_units)
   mlp = MLP(in_dim, dnn_hidden_units, out_dim, neg_slope).to(device)
+
+  # Choose your optimizer
   #print('This is SGD')
   # optimizer = torch.optim.SGD(mlp.parameters(), lr = FLAGS.learning_rate)
   print("Opt is Adam")
-  # optimizer = torch.optim.Adam(mlp.parameters(), lr = FLAGS.learning_rate)
-  optimizer = torch.optim.Adam(mlp.parameters(),lr = lr, weight_decay = wd)
-  #  lr=1.25e-3
+  optimizer = torch.optim.Adam(mlp.parameters(), lr = FLAGS.learning_rate)
+  # optimizer = torch.optim.Adam(mlp.parameters(),lr = lr, weight_decay = wd)
+
   loss_funct = nn.CrossEntropyLoss()
 
   #Adding regularization
   reg_on = False
-  dropout_on = False
   reg_const = 0.00001
-  # steps = 500
-  steps = int((cifar10_set['train'].num_examples/FLAGS.batch_size) * 16)
-  # dataset is size 50,000
-  #print(steps)
-  # dataset is size 50,000
 
-  for i in range(0, steps + 1):
+  #Declare the steps
+  # steps = int((cifar10_set['train'].num_examples/FLAGS.batch_size) * 16)
+  steps = FLAGS.max_steps
+
+  # Using already pulled data do a step
+  y = mlp.forward(x)
+  loss = loss_funct(y, torch.LongTensor(np.argmax(t, 1)).to(device))
+  if reg_on:
+    for mod in mlp.modls:
+      if type(mod) == nn.Linear:
+        loss += loss + (torch.sum(torch.abs(mod.weight)) * reg_const)
+  optimizer.zero_grad()
+  loss.backward()
+  optimizer.step()
+  loss_train.append(loss)
+  acc_train.append(accuracy(y.cpu().detach().numpy(), t))
+  x, t = cifar10_set['test'].images, cifar10_set['test'].labels
+  x = torch.tensor(x.reshape(x.shape[0], -1), dtype=torch.float32).to(device)
+  y = mlp.forward(x)
+  acc_test.append(accuracy(y.cpu().detach().numpy(), t))
+  print("The accuracy at step, " + str(0) + " is : " + str(acc_test[-1]))
+
+  # Loop through the rest of the data
+  for i in range(1, steps + 1):
     x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
     x = torch.tensor(x.reshape(FLAGS.batch_size, -1), dtype=torch.float32).to(device)
     y = mlp.forward(x)
@@ -140,6 +163,7 @@ def train():
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
+    # Evaluation and data storage step
     if i % FLAGS.eval_freq == 0:
       loss_train.append(loss)
       acc_train.append(accuracy(y.cpu().detach().numpy(), t))
@@ -150,7 +174,6 @@ def train():
       print("The accuracy at step, " + str(i) + " is : " + str(acc_test[-1]))
 
   #Plotting the accuracy of test and train:
-  # plt.figure(0, figsize = (17,10))
   plt.figure(0)
   plt.plot(np.arange(0, len(acc_train) * FLAGS.eval_freq * FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size) / cifar10_set['train'].num_examples, acc_train, label='Train')
   plt.plot(np.arange(0, len(acc_train) * FLAGS.eval_freq* FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size) / cifar10_set['train'].num_examples, acc_test, label='Test')
@@ -162,7 +185,6 @@ def train():
   plt.savefig(acc_loc)
   # plt.show()
 
-  # plt.figure(1, figsize=(17,10))
   plt.figure(1)
   plt.plot(np.arange(0, len(loss_train)*FLAGS.eval_freq* FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size)/cifar10_set['train'].num_examples, loss_train, label = 'Train')
   plt.xlabel('Epoch')
@@ -171,7 +193,6 @@ def train():
   loss_loc = 'loss_adam_' + str((hu * 2) + 3) + '_learning_rate_' + str(lr) + '_weightdecay_' + str(wd) + '.png'
   plt.savefig(loss_loc)
   # plt.show()
-  # plt.legend()
   ########################
   # END OF YOUR CODE    #
   #######################

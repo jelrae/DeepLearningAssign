@@ -41,9 +41,10 @@ class MLP(nn.Module):
     super(MLP, self).__init__()
     mods = []
     cur_input = n_inputs
+    # if we have hidden, create hidden
     if len(n_hidden) > 0:
       for out_lay in n_hidden:
-        # Comment this out if you dont want batch norm
+        # Uncomment one of these if you dont want batch norm
         # 3.1
         # mods.append(cbn.CustomBatchNormAutograd(cur_input))
         # 3.2/3

@@ -28,12 +28,10 @@ class LinearModule(object):
     #######################
     self.params = {'weight': None, 'bias': None}
     self.grads = {'weight': None, 'bias': None}
-#    raise NotImplementedError
     self.params['weight'] = np.random.normal(loc=0.0, scale=0.0001, size=(out_features, in_features))
     self.params['bias'] = np.zeros((out_features,))
     self.grads['weight'] = np.zeros(shape=(out_features, in_features))
     self.grads['bias'] = np.zeros((out_features,))
-
 
     ########################
     # END OF YOUR CODE    #
@@ -57,7 +55,6 @@ class LinearModule(object):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-    #raise NotImplementedError
     # x is an S x l-1
     # W is an l x l-1
     # b is an l x 1
@@ -92,7 +89,6 @@ class LinearModule(object):
     dx =  dout @ self.params['weight']
 
     self.grads['weight'] = dout.T @ self.act
-    # self.grads['bias'] = np.sum(dout, axis=0).reshape([self.grads['bias'].shape[0],1])
     self.grads['bias'] = np.sum(dout, axis=0)
     # breakpoint()
     ########################
@@ -207,7 +203,6 @@ class SoftMaxModule(object):
     y = np.exp(x - mx)
     out = y / y.sum(axis = 1, keepdims = True)
     self.act = out
-    # print(out.shape)
     ########################
     # END OF YOUR CODE    #
     #######################
@@ -289,8 +284,6 @@ class CrossEntropyModule(object):
     # PUT YOUR CODE HERE  #
     #######################
     # raise NotImplementedError
-    # This works but aparently its less expensive to do multi
-    # dx = (-y / x)/y.shape[0]
     dx = -y / (x * y.shape[0])
     #print(dx.shape)
     ########################

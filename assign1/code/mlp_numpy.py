@@ -98,7 +98,6 @@ class MLP(object):
     # PUT YOUR CODE HERE  #
     #######################
     #raise NotImplementedError
-    error_init = dout
     error = dout
     for m in reversed(self.modules):
       error = m.backward(error)

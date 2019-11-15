@@ -77,16 +77,18 @@ def train():
   acc_train = []
   acc_test = []
 
-
+  #Basic declarations
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
   cifar10_set = cifar10_utils.get_cifar10(FLAGS.data_dir)
-
+  # get the number of outputs
   _, n_outputs =  cifar10_set['train']._labels.shape
 
+  #Declare model
   cnn = ConvNet(3,n_outputs).to(device)
   optimizer = torch.optim.Adam(cnn.parameters(), lr=FLAGS.learning_rate)
   loss_funct = nn.CrossEntropyLoss()
-  print(FLAGS.max_steps)
+
+  #Loop through data to train
   for i in range(0, FLAGS.max_steps+1):
     x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
     x = torch.tensor(x, dtype=torch.float32).to(device)
@@ -96,6 +98,7 @@ def train():
     loss.backward()
     optimizer.step()
 
+    #Evaluate and save for plotting
     if i % FLAGS.eval_freq == 0:
       tmp_test_acc = []
       loss_train.append(loss)
@@ -111,7 +114,6 @@ def train():
       print("The accuracy at step, " + str(i) + " is : " + str(acc_test[-1]))
 
   #Plotting the accuracy of test and train:
-  # plt.figure(0, figsize = (17,10))
   plt.figure(0)
   plt.plot(np.arange(0, len(acc_train) * FLAGS.eval_freq * FLAGS.batch_size, FLAGS.eval_freq * FLAGS.batch_size) / cifar10_set['train'].num_examples, acc_train, label='Train')
   plt.plot(np.arange(0, len(acc_train) * FLAGS.eval_freq * FLAGS.batch_size, FLAGS.eval_freq * FLAGS.batch_size) / cifar10_set['train'].num_examples, acc_test, label='Test')
@@ -122,7 +124,6 @@ def train():
   plt.savefig('cnn_accuracy_correct.png')
   # plt.show()
 
-  # plt.figure(1, figsize=(17,10))
   plt.figure(1)
   plt.plot(np.arange(0, len(loss_train)*FLAGS.eval_freq* FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size)/cifar10_set['train'].num_examples, loss_train, label = 'Train')
   plt.xlabel('Epoch')
@@ -130,7 +131,6 @@ def train():
   plt.title('Loss Through Training')
   plt.savefig('cnn_loss_correct.png')
   # plt.show()
-  # plt.legend()
   ########################
   # END OF YOUR CODE    #
   #######################

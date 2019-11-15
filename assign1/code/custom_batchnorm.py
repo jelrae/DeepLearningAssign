@@ -162,7 +162,7 @@ class CustomBatchNormManualFunction(torch.autograd.Function):
     B = grad_output.shape[0]
     dxh = grad_output * g
 
-    # compute gradients
+    # Gradients
     grad_input = (1. / B) * i_var * (B*dxh - torch.sum(dxh, dim=0) - x_h*torch.sum(dxh*x_h, dim=0))
     grad_beta = torch.sum(grad_output, dim=0)
     grad_gamma = torch.sum(x_h*grad_output, dim=0)

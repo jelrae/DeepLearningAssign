@@ -80,41 +80,55 @@ def train():
   else:
     dnn_hidden_units = []
 
-  # Get negative slope parameter for LeakyReLU
-  neg_slope = FLAGS.neg_slope
-
   ########################
   # PUT YOUR CODE HERE  #
   #######################
   #raise NotImplementedError
   #Load in data set
   cifar10_set = cifar10_utils.get_cifar10(FLAGS.data_dir)
-  # Get Batches
-  batches = []
 
   #Init tracking arrays
   test_acc = []
   train_loss = []
   train_acc = []
-
-  x, y = cifar10_set['train'].next_batch(FLAGS.batch_size)
+  # pull in the first set and get the shapes
+  x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
   x = x.reshape(FLAGS.batch_size, -1)
-  out_dim = y.shape[1]
+  out_dim = t.shape[1]
   in_dim = x.shape[1]
 
   mlp = MLP(in_dim, dnn_hidden_units, out_dim, FLAGS.neg_slope)
   loss_funct = CrossEntropyModule()
 
-  for i in range(0, FLAGS.max_steps+1):
+  # First pass of the data
+  y = mlp.forward(x)
+  loss = loss_funct.forward(y, t)
+  mlp.backward(loss_funct.backward(y, t))
+  for mod in mlp.modules:
+    if type(mod) == LinearModule:
+      mod.params['weight'] -= FLAGS.learning_rate * mod.grads['weight']
+      mod.params['bias'] -= FLAGS.learning_rate * mod.grads['bias']
+  train_loss.append(loss)
+  train_acc.append(accuracy(y, t))
+  x, t = cifar10_set['test'].images, cifar10_set['test'].labels
+  x = x.reshape(x.shape[0], -1)
+  y = mlp.forward(x)
+  test_acc.append(accuracy(y, t))
+  print("The accuracy at step, " + str(0) + " is : " + str(test_acc[-1]))
+
+  # loop through till steps are all done
+  for i in range(1, FLAGS.max_steps+1):
     x, t = cifar10_set['train'].next_batch(FLAGS.batch_size)
     x = x.reshape(FLAGS.batch_size, -1)
     y = mlp.forward(x)
     loss = loss_funct.forward(y,t)
     mlp.backward(loss_funct.backward(y,t))
+    #Update the weights
     for mod in mlp.modules:
       if type(mod) == LinearModule:
         mod.params['weight'] -= FLAGS.learning_rate * mod.grads['weight']
         mod.params['bias'] -= FLAGS.learning_rate * mod.grads['bias']
+    # Evaluation and acc/loss saving
     if i % FLAGS.eval_freq == 0:
       train_loss.append(loss)
       train_acc.append(accuracy(y,t))
@@ -125,10 +139,13 @@ def train():
       print("The accuracy at step, " + str(i) + " is : " + str(test_acc[-1]))
 
   #Plotting the accuracy of test and train:
-  # plt.figure(0, figsize = (17,10))
   plt.figure(0)
-  plt.plot(np.arange(0, len(train_acc))/FLAGS.batch_size, train_acc, label = 'Train')
-  plt.plot(np.arange(0,len(train_acc))/FLAGS.batch_size, FLAGS.eval_freq), test_acc, label = 'Test')
+  plt.plot(
+    np.arange(0, len(train_acc) * FLAGS.eval_freq * FLAGS.batch_size, FLAGS.eval_freq * FLAGS.batch_size) / cifar10_set[
+      'train'].num_examples, train_acc, label='Train')
+  plt.plot(
+    np.arange(0, len(train_acc) * FLAGS.eval_freq * FLAGS.batch_size, FLAGS.eval_freq * FLAGS.batch_size) / cifar10_set[
+      'train'].num_examples, test_acc, label='Test')
   plt.xlabel('Epoch')
   plt.ylabel('Accuracy')
   plt.title('Accuracy of Train and Test Set Through Training')
@@ -136,15 +153,13 @@ def train():
   plt.savefig('Accuracy_basic1.png')
   # plt.show()
 
-  # plt.figure(1, figsize=(17,10))
   plt.figure(1)
-  plt.plot(np.arange(0, len(train_loss))/FLAGS.batch_size, train_loss, label = 'Train')
+  plt.plot(np.arange(0, len(train_loss)*FLAGS.eval_freq* FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size)/cifar10_set['train'].num_examples, train_loss, label = 'Train')
   plt.xlabel('Epoch')
   plt.ylabel('Loss')
   plt.title('Loss Through Training')
   plt.savefig('Loss_basic1.png')
   # plt.show()
-  # plt.legend()
 
   ########################
   # END OF YOUR CODE    #
