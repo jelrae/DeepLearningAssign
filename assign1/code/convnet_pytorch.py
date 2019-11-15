@@ -36,8 +36,6 @@ class ConvNet(nn.Module):
     mp = {'stride': 2, 'padding': 1, 'kernel': 3}
     conv = {'stride': 1, 'padding': 1, 'kernel': 3}
     size = [64,128,256,512]
-    print(size[3])
-    print(n_classes)
 
     self.mods = nn.Sequential(
     nn.Conv2d(n_channels, size[0],kernel_size= conv['kernel'], stride=conv['stride'], padding=conv['padding']),
@@ -69,8 +67,10 @@ class ConvNet(nn.Module):
     nn.BatchNorm2d(size[3]),
     nn.ReLU(),
     nn.Conv2d(size[3], size[3],kernel_size= mp['kernel'], stride=mp['stride'], padding=mp['padding']),
-    nn.Linear(size[3], n_classes)
+    nn.BatchNorm2d(size[3]),
+    nn.ReLU()
     )
+    self.lin = nn.Linear(size[3], n_classes)
 
     ########################
     # END OF YOUR CODE    #
@@ -95,6 +95,7 @@ class ConvNet(nn.Module):
     #######################
     # raise NotImplementedError
     out = self.mods(x)
+    out = self.lin(out.squeeze())
     ########################
     # END OF YOUR CODE    #
     #######################

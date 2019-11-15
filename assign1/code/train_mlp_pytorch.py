@@ -101,10 +101,10 @@ def train():
   out_dim = y.shape[1]
   in_dim = x.shape[1]
   hu = 4
-  dnn_hidden_units[0] = 600
-  for i in range(0,hu):
-    dnn_hidden_units.append(int(500-(450*(i/hu))))
-  print(dnn_hidden_units)
+  # dnn_hidden_units[0] = 600
+  # for i in range(0,hu):
+  #   dnn_hidden_units.append(int(500-(450*(i/hu))))
+  # print(dnn_hidden_units)
   mlp = MLP(in_dim, dnn_hidden_units, out_dim, neg_slope).to(device)
   # optimizer = torch.optim.SGD(mlp.parameters(), lr = FLAGS.learning_rate)
   print("Opt is Adam")
@@ -117,7 +117,7 @@ def train():
   dropout_on = False
   reg_const = 0.00001
   # steps = 500
-  steps = int((cifar10_set['train'].num_examples/FLAGS.batch_size) * 12)
+  steps = int((cifar10_set['train'].num_examples/FLAGS.batch_size) * 2)
   # dataset is size 50,000
   #print(steps)
   # dataset is size 50,000
@@ -146,8 +146,8 @@ def train():
   #Plotting the accuracy of test and train:
   # plt.figure(0, figsize = (17,10))
   plt.figure(0)
-  plt.plot(np.arange(0, len(acc_train))/FLAGS.batch_size, acc_train, label = 'Train')
-  plt.plot(np.arange(0,len(acc_train), FLAGS.eval_freq)/FLAGS.batch_size, acc_test, label = 'Test')
+  plt.plot(np.arange(0, len(acc_train) * FLAGS.eval_freq * FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size) / cifar10_set['train'].num_examples, acc_train, label='Train')
+  plt.plot(np.arange(0, len(acc_train) * FLAGS.eval_freq* FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size) / cifar10_set['train'].num_examples, acc_test, label='Test')
   plt.xlabel('Epoch')
   plt.ylabel('Accuracy')
   plt.title('Accuracy of Train and Test Set Through Training')
@@ -157,7 +157,7 @@ def train():
 
   # plt.figure(1, figsize=(17,10))
   plt.figure(1)
-  plt.plot(np.arange(0, len(loss_train))/FLAGS.batch_size, loss_train, label = 'Train')
+  plt.plot(np.arange(0, len(loss_train)*FLAGS.eval_freq* FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size)/cifar10_set['train'].num_examples, loss_train, label = 'Train')
   plt.xlabel('Epoch')
   plt.ylabel('Loss')
   plt.title('Loss Through Training')

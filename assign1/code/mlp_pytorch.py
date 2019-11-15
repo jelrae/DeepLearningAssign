@@ -46,8 +46,8 @@ class MLP(nn.Module):
         # Comment this out if you dont want batch norm
         # 3.1
         # mods.append(cbn.CustomBatchNormAutograd(cur_input))
-        # 3.2
-        mods.append(cbn.CustomBatchNormManualFunction(cur_input))
+        # 3.2/3
+        # mods.append(cbn.CustomBatchNormManualModule(cur_input))
         print('Adding Linear Model')
         mods.append(nn.Linear(in_features=cur_input, out_features=out_lay))
         print('Adding LeakyRElU')

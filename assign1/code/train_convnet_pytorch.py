@@ -96,19 +96,24 @@ def train():
     optimizer.step()
 
     if i % FLAGS.eval_freq == 0:
+      tmp_test_acc = []
       loss_train.append(loss)
       acc_train.append(accuracy(y.cpu().detach().numpy(), t))
-      x,t = cifar10_set['test'].images, cifar10_set['test'].labels
-      x = torch.tensor(x.reshape(x.shape[0], -1), dtype=torch.float32).to(device)
-      y = mlp.forward(x)
-      acc_test.append(accuracy(y.cpu().detach().numpy(),t))
+      # x,t = cifar10_set['test'].images, cifar10_set['test'].labels
+      # x = torch.tensor(x, dtype=torch.float32).to(device)
+      for i in range(0, int(cifar10_set['test']._num_examples/50)):
+        x, t = cifar10_set['train'].next_batch(50)
+        x = torch.tensor(x, dtype=torch.float32).to(device)
+        y = cnn.forward(x)
+        tmp_test_acc.append(accuracy(y.cpu().detach().numpy(),t))
+      acc_test.append(np.array(tmp_test_acc).mean())
       print("The accuracy at step, " + str(i) + " is : " + str(acc_test[-1]))
 
   #Plotting the accuracy of test and train:
   # plt.figure(0, figsize = (17,10))
   plt.figure(0)
-  plt.plot(np.arange(0, len(acc_train))/FLAGS.batch_size, acc_train, label = 'Train')
-  plt.plot(np.arange(0,len(acc_train), FLAGS.eval_freq)/FLAGS.batch_size, acc_test, label = 'Test')
+  plt.plot(np.arange(0, len(acc_train) * FLAGS.eval_freq * FLAGS.batch_size, FLAGS.eval_freq * FLAGS.batch_size) / cifar10_set['train'].num_examples, acc_train, label='Train')
+  plt.plot(np.arange(0, len(acc_train) * FLAGS.eval_freq * FLAGS.batch_size, FLAGS.eval_freq * FLAGS.batch_size) / cifar10_set['train'].num_examples, acc_test, label='Test')
   plt.xlabel('Epoch')
   plt.ylabel('Accuracy')
   plt.title('Accuracy of Train and Test Set Through Training')
@@ -118,7 +123,7 @@ def train():
 
   # plt.figure(1, figsize=(17,10))
   plt.figure(1)
-  plt.plot(np.arange(0, len(loss_train))/FLAGS.batch_size, loss_train, label = 'Train')
+  plt.plot(np.arange(0, len(loss_train)*FLAGS.eval_freq* FLAGS.batch_size, FLAGS.eval_freq* FLAGS.batch_size)/cifar10_set['train'].num_examples, loss_train, label = 'Train')
   plt.xlabel('Epoch')
   plt.ylabel('Loss')
   plt.title('Loss Through Training')
