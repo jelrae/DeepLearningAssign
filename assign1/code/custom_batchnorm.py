@@ -126,7 +126,6 @@ class CustomBatchNormManualFunction(torch.autograd.Function):
     ########################
     # PUT YOUR CODE HERE  #
     #######################
-    # v = torch.var(input, dim=0, unbiased=False)
     i_var = 1 / torch.sqrt(torch.var(input, dim=0, unbiased=False) + eps)
     x = (input - torch.mean(input, dim=0)) * i_var
     out = x * gamma + beta
