@@ -23,12 +23,16 @@ import time
 from datetime import datetime
 import numpy as np
 
+import sys
+sys.path.append("..")
+
 import torch
 from torch.utils.data import DataLoader
 
 from part1.dataset import PalindromeDataset
 from part1.vanilla_rnn import VanillaRNN
 from part1.lstm import LSTM
+
 
 # You may want to look into tensorboard for logging
 # from torch.utils.tensorboard import SummaryWriter
@@ -42,54 +46,77 @@ def train(config):
     # Initialize the device which to run the model on
     device = torch.device(config.device)
 
-    # Initialize the model that we are going to use
-    model = None  # fixme
+    p_len_list = [4,5,6,7,8,9,10,15,20,25,30,35,40,45,50]
 
-    # Initialize the dataset and data loader (note the +1)
-    dataset = PalindromeDataset(config.input_length+1)
-    data_loader = DataLoader(dataset, config.batch_size, num_workers=1)
+    for in_len in p_len_list:
+        config.input_length = in_len
 
-    # Setup the loss and optimizer
-    criterion = None  # fixme
-    optimizer = None  # fixme
+        np.random.seed(42)
 
-    for step, (batch_inputs, batch_targets) in enumerate(data_loader):
+        # Initialize the model that we are going to use
+        model = VanillaRNN(config.input_length, config.input_dim, config.num_hidden, config.num_classes, device)
 
-        # Only for time measurement of step through network
-        t1 = time.time()
+        # Initialize the dataset and data loader (note the +1)
+        dataset = PalindromeDataset(config.input_length+1)
+        data_loader = DataLoader(dataset, 4000, num_workers=1)
 
-        # Add more code here ...
+        (test_inputs, test_targets) = next(iter(data_loader))
 
-        ############################################################################
-        # QUESTION: what happens here and why?
-        ############################################################################
-        torch.nn.utils.clip_grad_norm(model.parameters(), max_norm=config.max_norm)
-        ############################################################################
+        data_loader = DataLoader(dataset, config.batch_size, num_workers=1)
 
-        # Add more code here ...
+        #Test set ~ 4000
 
-        loss = np.inf   # fixme
-        accuracy = 0.0  # fixme
+        # Setup the loss and optimizer
+        criterion = torch.nn.CrossEntropyLoss()
+        optimizer = torch.optim.RMSprop(model.parameters(), lr=config.learning_rate)
 
-        # Just for time measurement
-        t2 = time.time()
-        examples_per_second = config.batch_size/float(t2-t1)
+        #Data Storage
+        loss_over_time = []
+        acc_over_time = []
 
-        if step % 10 == 0:
+        for step, (batch_inputs, batch_targets) in enumerate(data_loader):
 
-            print("[{}] Train Step {:04d}/{:04d}, Batch Size = {}, Examples/Sec = {:.2f}, "
-                  "Accuracy = {:.2f}, Loss = {:.3f}".format(
-                    datetime.now().strftime("%Y-%m-%d %H:%M"), step,
-                    config.train_steps, config.batch_size, examples_per_second,
-                    accuracy, loss
-            ))
+            # Only for time measurement of step through network
+            t1 = time.time()
+            model_out = model.forward(batch_inputs)
+            loss = criterion(model_out, batch_targets)
+            optimizer.zero_grad()
+            loss.backward()
 
-        if step == config.train_steps:
-            # If you receive a PyTorch data-loader error, check this bug report:
-            # https://github.com/pytorch/pytorch/pull/9655
-            break
+            ############################################################################
+            # QUESTION: what happens here and why?  It seems that its giving the gradient an upper limit so that there arent exploading gradients
+            ############################################################################
+            torch.nn.utils.clip_grad_norm(model.parameters(), max_norm=config.max_norm)
+            ############################################################################
 
-    print('Done training.')
+            # Add more code here ...
+
+            optimizer.step()
+
+            loss = loss.item()
+            # loss_over_time.append(loss)
+
+            accuracy = np.average((torch.max(model_out, 1)[1] == batch_targets))
+            # acc_over_time.append(accuracy)
+            # Just for time measurement
+            t2 = time.time()
+            examples_per_second = config.batch_size/float(t2-t1)
+
+            if step % 10 == 0:
+
+                print("[{}] Train Step {:04d}/{:04d}, Batch Size = {}, Examples/Sec = {:.2f}, "
+                      "Accuracy = {:.2f}, Loss = {:.3f}".format(
+                        datetime.now().strftime("%Y-%m-%d %H:%M"), step,
+                        config.train_steps, config.batch_size, examples_per_second,
+                        accuracy, loss
+                ))
+
+            if step == config.train_steps:
+                # If you receive a PyTorch data-loader error, check this bug report:
+                # https://github.com/pytorch/pytorch/pull/9655
+                break
+
+        print('Done training.')
 
 
  ################################################################################
