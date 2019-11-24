@@ -44,9 +44,11 @@ class VanillaRNN(nn.Module):
     def forward(self, x):
         # print(x.size(0))
         h_t = torch.zeros(x.size(0), self.num_hidden)
+        self.h_list = []
         # print('This is a thing' + str(h_t.size()))
         for i in range(0,self.seq_len):
-            h_t = torch.tanh((x[:,i, None] @ self.W_hx.t()) + (h_t @ self.W_hh) + self.b_h)
+            h_t = torch.autograd.Variable(torch.tanh((x[:,i, None] @ self.W_hx.t()) + (h_t @ self.W_hh) + self.b_h), require_grad = True)
+            self.h_list.append(h_t)
         # print((h_t @ self.W_ph.t()).size())
         # print(self.b_p.size())
         p = h_t @ self.W_ph.t() + self.b_p
