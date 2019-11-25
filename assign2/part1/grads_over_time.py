@@ -48,7 +48,7 @@ def train(config):
     # Initialize the device which to run the model on
     device = torch.device(config.device)
 
-    in_len = 49
+    in_len = 24
     print("The Palendrom length is: " + str(in_len+1))
     config.input_length = in_len
 
@@ -73,9 +73,10 @@ def train(config):
     loss = criterion(model_out, batch_targets)
     optimizer.zero_grad()
     loss.backward()
-    grad_norms = [torch.norm(h.grad) for h in model.h_list]
 
-    plt.plot(np.arange(0, len(grad_norms)), grad_norms, label = 'RNN')
+    RNN_grad_norms = [torch.norm(h.grad) for h in model.h_list]
+
+    plt.plot(np.arange(0, len(RNN_grad_norms)), RNN_grad_norms, label = 'RNN')
 
     model = LSTM(config.input_length, config.input_dim, config.num_hidden, config.num_classes, device)
     optimizer = torch.optim.RMSprop(model.parameters(), lr=config.learning_rate)
@@ -91,13 +92,14 @@ def train(config):
     loss = criterion(model_out, batch_targets)
     optimizer.zero_grad()
     loss.backward()
-    grad_norms = [torch.norm(h.grad) for h in model.h_list]
+    LSTM_grad_norms = [torch.norm(h.grad) for h in model.h_list]
 
     print('Done training.')
-    plt.plot(np.arange(0,len(grad_norms)), grad_norms, label = 'LSTM')
+    plt.plot(np.arange(0,len(LSTM_grad_norms)), LSTM_grad_norms, label = 'LSTM')
     plt.title("Gradient Norms through 50 Time Steps in the RNN and LSTM")
     plt.xlabel("Time Steps")
     plt.ylabel("Gradient Norms")
+    plt.yscale('log')
     plt.legend()
     plt.savefig('figs/Gradient_Norms.png')
     plt.show()

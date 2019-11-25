@@ -27,7 +27,19 @@ class TextGenerationModel(nn.Module):
 
         super(TextGenerationModel, self).__init__()
         # Initialization here...
+        self.seq_len = seq_length
+        self.dev = device
+        self.vs = vocabulary_size
+        self.num_hidden = lstm_num_hidden
+        self.num_layers = lstm_num_layers
+        self.batch_size = batch_size
+
+        self.mod_lay = nn.Sequential(
+            nn.LSTM(input_size=vocabulary_size, hidden_size=lstm_num_hidden, num_layers=lstm_num_layers),
+            nn.Linear(in_features= lstm_num_hidden, out_features=vocabulary_size)
+        )
 
     def forward(self, x):
-        # Implementation here...
-        pass
+        print(x.shape)
+        out = self.mod_lay.forward(x)
+        return out

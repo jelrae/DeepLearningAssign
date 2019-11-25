@@ -33,25 +33,24 @@ class VanillaRNN(nn.Module):
         self.dev = device
         self.s_o = num_classes
         self.num_hidden = num_hidden
+        initial_param = math.sqrt(6/(num_hidden + input_dim))
 
         # Trainable Parameters
         self.b_h = nn.Parameter(torch.zeros(num_hidden,))
-        self.W_hx = nn.Parameter(torch.Tensor(num_hidden, input_dim).normal_(0,0.001))
-        self.W_hh = nn.Parameter(torch.Tensor(num_hidden, num_hidden).normal_(0,0.001))
+        self.W_hx = nn.Parameter(torch.Tensor(num_hidden, input_dim).uniform_(0,0.001))
+        self.W_hh = nn.Parameter(torch.Tensor(num_hidden, num_hidden).uniform_(0,0.001))
         self.b_p = nn.Parameter(torch.zeros(num_classes,))
-        self.W_ph = nn.Parameter(torch.Tensor(num_classes, num_hidden).normal_(0,0.001))
+        self.W_ph = nn.Parameter(torch.Tensor(num_classes, num_hidden).uniform_(0,0.001))
 
     def forward(self, x):
         # print(x.size(0))
-        h_t = torch.zeros(x.size(0), self.num_hidden)
+        h_t = torch.autograd.Variable(torch.zeros(size = (x.size(0), self.num_hidden)), requires_grad = True)
         self.h_list = []
-        # print('This is a thing' + str(h_t.size()))
+        self.h_list.append(h_t)
+        self.h_list[-1].retain_grad()
         for i in range(0,self.seq_len):
-            h_t = torch.autograd.Variable(torch.tanh((x[:,i, None] @ self.W_hx.t()) + (h_t @ self.W_hh) + self.b_h), require_grad = True)
+            h_t = torch.tanh((x[:,i, None] @ self.W_hx.t()) + (self.h_list[-1] @ self.W_hh) + self.b_h)
             self.h_list.append(h_t)
-        # print((h_t @ self.W_ph.t()).size())
-        # print(self.b_p.size())
+            self.h_list[-1].retain_grad()
         p = h_t @ self.W_ph.t() + self.b_p
-        # print(p.size())
-        # breakpoint()
         return p

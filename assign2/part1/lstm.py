@@ -60,19 +60,22 @@ class LSTM(nn.Module):
 
     def forward(self, x):
 
-        h_t = torch.zeros(x.size(0), self.num_hidden)
+        h_t = torch.autograd.Variable(torch.zeros(x.size(0), self.num_hidden), requires_grad = True)
         c_t = torch.zeros(x.size(0), self.num_hidden)
         self.h_list = []
+        self.h_list.append(h_t)
+        self.h_list[-1].retain_grad()
 
         for itter in range(0,self.seq_len):
 
-            g = torch.tanh((x[:,itter, None] @ self.W_gx.t()) + (h_t @ self.W_gh) + self.b_g)
-            i = torch.sigmoid((x[:, itter, None] @ self.W_ix.t()) + (h_t @ self.W_ih) + self.b_i)
-            f = torch.tanh((x[:, itter, None] @ self.W_fx.t()) + (h_t @ self.W_fh) + self.b_f)
-            o = torch.tanh((x[:, itter, None] @ self.W_ox.t()) + (h_t @ self.W_oh) + self.b_o)
+            g = torch.tanh((x[:,itter, None] @ self.W_gx.t()) + (self.h_list[-1] @ self.W_gh) + self.b_g)
+            i = torch.sigmoid((x[:, itter, None] @ self.W_ix.t()) + (self.h_list[-1] @ self.W_ih) + self.b_i)
+            f = torch.tanh((x[:, itter, None] @ self.W_fx.t()) + (self.h_list[-1] @ self.W_fh) + self.b_f)
+            o = torch.tanh((x[:, itter, None] @ self.W_ox.t()) + (self.h_list[-1] @ self.W_oh) + self.b_o)
             c_t = g * i + c_t * f
-            h_t = torch.autograd.Variable(torch.tanh(c_t) * o, require_grad = True)
+            h_t = torch.tanh(c_t) * o
             self.h_list.append(h_t)
+            self.h_list[-1].retain_grad()
             p_t = h_t @ self.W_ph.t() + self.b_p
 
         return p_t

@@ -36,18 +36,19 @@ from part2.model import TextGenerationModel
 def train(config):
 
     # Initialize the device which to run the model on
-    device = torch.device(config.device)
-
-    # Initialize the model that we are going to use
-    model = TextGenerationModel( ... )  # fixme
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Initialize the dataset and data loader (note the +1)
-    dataset = TextDataset( ... )  # fixme
+    dataset = TextDataset(config.txt_file, config.seq_length)
     data_loader = DataLoader(dataset, config.batch_size, num_workers=1)
 
+    # Initialize the model that we are going to use
+    model = TextGenerationModel(config.batch_size, config.seq_length, dataset.vocab_size,
+                 config.lstm_num_hidden, config.lstm_num_layers, device)
+
     # Setup the loss and optimizer
-    criterion = None  # fixme
-    optimizer = None  # fixme
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.RMSprop(model.parameters(), lr=config.learning_rate)
 
     for step, (batch_inputs, batch_targets) in enumerate(data_loader):
 
@@ -55,11 +56,19 @@ def train(config):
         t1 = time.time()
 
         #######################################################
-        # Add more code here ...
+        model_out = model.forward(batch_inputs)
+        loss = criterion(model_out, batch_targets)
+        optimizer.zero_grad()
+        loss.backward()
         #######################################################
 
-        loss = np.inf   # fixme
-        accuracy = 0.0  # fixme
+        torch.nn.utils.clip_grad_norm(model.parameters(), max_norm=config.max_norm)
+
+        optimizer.step()
+
+        loss = loss.item()
+
+        accuracy = np.average((torch.max(model_out, 1)[1] == batch_targets))
 
         # Just for time measurement
         t2 = time.time()
@@ -95,7 +104,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # Model params
-    parser.add_argument('--txt_file', type=str, required=True, help="Path to a .txt file to train on")
+    parser.add_argument('--txt_file', type=str, default = 'assets/book_EN_grimms_fairy_tails.txt', help="Path to a .txt file to train on")
+    # parser.add_argument('--txt_file', type=str, default='assets/book_EN_grimms_fairy_tails', required=True,
+    #                     help="Path to a .txt file to train on")
     parser.add_argument('--seq_length', type=int, default=30, help='Length of an input sequence')
     parser.add_argument('--lstm_num_hidden', type=int, default=128, help='Number of hidden units in the LSTM')
     parser.add_argument('--lstm_num_layers', type=int, default=2, help='Number of LSTM layers in the model')
